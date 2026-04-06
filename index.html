@@ -219,11 +219,11 @@ input[type=range]::-moz-range-thumb{
     </div>
   </div>
 
-  <div class="sec-label">Prospect contact <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4)">(optional — fill all or none)</span></div>
+  <div class="sec-label">Prospect contact <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4)">(required to save: company, first, last, email)</span></div>
   <div class="card">
     <div class="field-group">
       <label class="field-label">Company name</label>
-      <input type="text" id="f_storename" class="big-input" style="font-size:16px;text-align:left" placeholder="e.g. Sunshine Fuel &amp; Go" oninput="updateStoreName()">
+      <input type="text" id="f_storename" class="big-input" style="font-size:16px;text-align:left" placeholder="e.g. Sunshine Fuel &amp; Go" oninput="updateStoreName();validateContact()">
     </div>
     <div class="grid2">
       <div class="field-group">
@@ -241,27 +241,27 @@ input[type=range]::-moz-range-thumb{
     </div>
     <div class="field-group">
       <label class="field-label">Phone</label>
-      <input type="tel" id="f_phone" class="big-input" style="font-size:16px;text-align:left" placeholder="(555) 555-5555" oninput="validateContact()">
+      <input type="tel" id="f_phone" class="big-input" style="font-size:16px;text-align:left" placeholder="(555) 555-5555">
     </div>
     <div class="field-group">
       <label class="field-label">Street address</label>
-      <input type="text" id="f_street" class="big-input" style="font-size:16px;text-align:left" placeholder="123 Main St" oninput="validateContact()">
+      <input type="text" id="f_street" class="big-input" style="font-size:16px;text-align:left" placeholder="123 Main St">
     </div>
     <div class="grid2">
       <div class="field-group">
         <label class="field-label">City</label>
-        <input type="text" id="f_city" class="big-input" style="font-size:16px;text-align:left" placeholder="City" oninput="validateContact()">
+        <input type="text" id="f_city" class="big-input" style="font-size:16px;text-align:left" placeholder="City">
       </div>
       <div class="field-group">
         <label class="field-label">State</label>
-        <input type="text" id="f_state" class="big-input" style="font-size:16px;text-align:left" placeholder="FL" maxlength="2" oninput="validateContact()">
+        <input type="text" id="f_state" class="big-input" style="font-size:16px;text-align:left" placeholder="FL" maxlength="2">
       </div>
     </div>
     <div class="field-group">
       <label class="field-label">Zip code</label>
-      <input type="text" id="f_zip" class="big-input" style="font-size:16px;text-align:left" placeholder="33157" maxlength="10" oninput="validateContact()">
+      <input type="text" id="f_zip" class="big-input" style="font-size:16px;text-align:left" placeholder="33157" maxlength="10">
     </div>
-    <div id="contact-warning" class="contact-warn">All contact fields must be filled out together, or leave all blank.</div>
+    <div id="contact-warning" class="contact-warn">Company name, first name, last name, and email are required to save.</div>
     <div class="field-group" style="margin-top:1.1rem">
       <label class="field-label">Notes</label>
       <textarea id="f_notes" class="big-input" style="font-size:14px;text-align:left;min-height:80px;resize:vertical" placeholder="Additional notes…"></textarea>
@@ -638,13 +638,13 @@ function positionMarkers() {
 }
 
 function validateContact() {
-  var fields = ['f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'];
-  var vals = fields.map(function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; });
+  var required = ['f_storename','f_fname','f_lname','f_email'];
+  var vals = required.map(function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; });
   var filled = vals.filter(function(v) { return v.length > 0; }).length;
   var warn = document.getElementById('contact-warning');
-  var partial = filled > 0 && filled < fields.length;
+  var partial = filled > 0 && filled < required.length;
   if (warn) warn.style.display = partial ? 'block' : 'none';
-  fields.forEach(function(id, i) {
+  required.forEach(function(id, i) {
     var el = document.getElementById(id);
     if (el) el.style.borderColor = partial && !vals[i] ? '#F09595' : '';
   });
@@ -908,8 +908,8 @@ function val(id) {
 }
 
 function isContactComplete() {
-  var fields = ['f_storename','f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'];
-  return fields.every(function(id) { return val(id).length > 0; });
+  var required = ['f_storename','f_fname','f_lname','f_email'];
+  return required.every(function(id) { return val(id).length > 0; });
 }
 
 function buildRecord() {
@@ -1061,7 +1061,7 @@ function renderQueueStatus() {
       btn.title = '';
     } else {
       btn.disabled = true;
-      btn.title = 'Complete prospect contact info on Tab 1 to save.';
+      btn.title = 'Company name, first name, last name, and email required to save.';
     }
   }
   var el = document.getElementById('queue-count');
