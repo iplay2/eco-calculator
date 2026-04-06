@@ -794,14 +794,15 @@ function model() {
   var windowBoost = activeZones.window ? V.window / 100 : 0;
   var baseP2S = V.fillups > 0 ? Math.min(V.basefoot / V.fillups, 0.95) : 0.44;
   var ecnInstore = ecnPumps * Math.min(baseP2S + windowBoost, 0.95);
+  var windowExisting = activeZones.window ? V.fillups * windowBoost : 0;
   var basketLift = activeZones.instore ? V.basefoot * V.basket * (V.lift / 100) : 0;
   var ecnFuelRev = ecnPumps * V.gallons * V.fuelprice;
-  var ecnInstoreNew = ecnInstore * V.basket;
+  var ecnInstoreNew = ecnInstore * V.basket + windowExisting * V.basket;
   var ecnTotal = ecnFuelRev + ecnInstoreNew + basketLift;
   var loyal = ecnPumps * 30 * 0.05;
   return {
     baseFuelRev:baseFuelRev, baseInstoreRev:baseInstoreRev, baseTotalDay:baseTotalDay,
-    ecnPumps:ecnPumps, ecnInstore:ecnInstore, ecnFuelRev:ecnFuelRev,
+    ecnPumps:ecnPumps, ecnInstore:ecnInstore+windowExisting, ecnFuelRev:ecnFuelRev,
     ecnInstoreNew:ecnInstoreNew, basketLift:basketLift, ecnTotal:ecnTotal,
     afterFuelRev:baseFuelRev+ecnFuelRev, afterInstoreRev:baseInstoreRev+ecnInstoreNew+basketLift,
     afterTotal:baseFuelRev+ecnFuelRev+baseInstoreRev+ecnInstoreNew+basketLift,
