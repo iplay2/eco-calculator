@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ECN Calculator">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#042C53">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0C447C;color:#fff;min-height:100vh;padding:0}
+
+/* Header */
+.app-header{background:#042C53;padding:1rem 1.25rem .75rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.app-title{font-size:20px;font-weight:600;color:#fff;line-height:1.2}
+.app-sub{font-size:13px;color:rgba(255,255,255,.6);margin-top:3px}
+.store-name-sub{font-size:13px;color:#85B7EB;margin-top:2px;min-height:18px}
+
+/* Tab bar */
+.tab-bar{display:flex;background:#042C53;border-bottom:1px solid rgba(255,255,255,.12);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-item{flex:0 0 auto;padding:14px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tab-item.active{color:#fff;border-bottom-color:#85B7EB}
+
+/* Content area */
+.tab-content{padding:1.25rem 1rem;display:none}
+.tab-content.active{display:block}
+
+/* Section labels */
+.sec-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:1.5rem 0 .75rem}
+.sec-label:first-child{margin-top:0}
+
+/* Cards */
+.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:1.1rem 1rem;margin-bottom:1rem}
+.card-white{background:#fff;border-radius:14px;padding:1.1rem 1rem;margin-bottom:1rem}
+
+/* Input fields */
+.field-group{margin-bottom:1.1rem}
+.field-group:last-child{margin-bottom:0}
+.field-label{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:6px;display:block}
+.field-label-dark{font-size:13px;color:#042C53;font-weight:500;margin-bottom:6px;display:block}
+.big-input{width:100%;font-size:22px;font-weight:600;padding:14px 16px;border:2px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;text-align:center;outline:none;-webkit-appearance:none}
+.big-input::placeholder{color:rgba(255,255,255,.35)}
+.big-input:focus{border-color:#85B7EB;background:rgba(255,255,255,.18)}
+.big-input-dark{width:100%;font-size:20px;font-weight:600;padding:14px 16px;border:2px solid rgba(12,68,124,.2);border-radius:10px;background:#F0F6FF;color:#042C53;text-align:center;outline:none;-webkit-appearance:none}
+.big-input-dark:focus{border-color:#185FA5}
+.field-note{font-size:11px;color:rgba(255,255,255,.5);margin-top:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Derived badge */
+.dbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border-radius:6px;padding:5px 10px;font-size:12px;color:rgba(255,255,255,.7);margin-top:6px}
+.dbadge strong{color:#fff}
+
+/* Contact warning */
+.contact-warn{display:none;margin-top:.5rem;font-size:12px;color:#FFD580;background:rgba(255,213,128,.15);border:1px solid rgba(255,213,128,.3);border-radius:8px;padding:8px 12px}
+
+/* Sliders */
+.slider-wrap{margin-bottom:1.3rem}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.slider-label{font-size:14px;color:rgba(255,255,255,.85);flex:1;line-height:1.3}
+.slider-val{font-size:20px;font-weight:700;color:#fff;min-width:72px;text-align:right}
+.slider-track{position:relative;padding-bottom:20px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:8px;
+  border-radius:4px;background:rgba(255,255,255,.2);
+  outline:none;cursor:pointer;display:block
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:32px;height:32px;border-radius:50%;
+  background:#fff;cursor:pointer;
+  border:3px solid #185FA5
+}
+input[type=range]::-moz-range-thumb{
+  width:32px;height:32px;border-radius:50%;
+  background:#fff;cursor:pointer;
+  border:3px solid #185FA5
+}
+.avg-tick-wrap{position:absolute;bottom:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.avg-tick{width:2px;height:8px;background:#FFD580;border-radius:1px;margin-bottom:1px}
+.avg-lbl{font-size:10px;color:#FFD580;white-space:nowrap}
+.source-note{font-size:11px;color:rgba(255,255,255,.45);margin-top:-4px;margin-bottom:.5rem}
+
+/* Badges */
+.bdg{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+.bdg-solid{background:rgba(61,193,168,.25);color:#9FE1CB}
+.bdg-est{background:rgba(239,159,39,.2);color:#FAC775}
+
+/* Zone buttons */
+.zone-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:.5rem}
+.zone-btn{border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:.9rem .6rem;cursor:pointer;background:rgba(255,255,255,.08);text-align:center}
+.zone-btn.active{border-color:#85B7EB;background:rgba(133,183,235,.15)}
+.zone-btn .zn{font-size:12px;font-weight:600;color:#fff;line-height:1.3}
+.zone-btn .zd{font-size:10px;color:rgba(255,255,255,.55);margin-top:3px}
+.zone-btn .zi{font-size:10px;color:#85B7EB;margin-top:5px}
+
+/* Nav buttons */
+.nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:1.25rem}
+.btn-primary{flex:1;padding:16px;border-radius:12px;border:none;background:#fff;color:#0C447C;font-size:16px;font-weight:700;cursor:pointer;text-align:center}
+.btn-secondary{flex:1;padding:16px;border-radius:12px;border:2px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:16px;font-weight:600;cursor:pointer;text-align:center}
+
+/* Competition */
+.step-hint{font-size:13px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem}
+.intersection{display:flex;flex-direction:column;align-items:center;margin:1rem 0}
+.int-row{display:flex;align-items:center;width:100%}
+.road-h{flex:1;height:44px;background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);position:relative;display:flex;align-items:center;justify-content:center}
+.road-v{width:44px;background:rgba(255,255,255,.08);border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15);flex:0 0 44px;display:flex;align-items:center;justify-content:center}
+.road-center{width:44px;height:44px;flex:0 0 44px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}
+.road-lbl{font-size:11px;color:rgba(255,255,255,.4)}
+.corner-btn{flex:1;min-height:88px;border-radius:12px;border:2px dashed rgba(255,255,255,.25);background:rgba(255,255,255,.06);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center}
+.corner-btn.client{border:2px solid #85B7EB;border-style:solid;background:rgba(133,183,235,.2)}
+.corner-btn.competitor{border:2px solid #F09595;border-style:solid;background:rgba(240,149,149,.15)}
+.corner-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.8)}
+.corner-sub{font-size:10px;color:rgba(255,255,255,.45)}
+.corner-badge{font-size:9px;padding:1px 6px;border-radius:3px;margin-top:2px}
+.cb-empty{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+.cb-client{background:rgba(133,183,235,.3);color:#B5D4F4}
+.cb-comp{background:rgba(240,149,149,.25);color:#F7C1C1}
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dir-btn{padding:13px 6px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;cursor:pointer;text-align:center}
+.dir-btn.active{border-color:#85B7EB;background:rgba(133,183,235,.15);color:#fff}
+.comp-factor-card{background:rgba(255,255,255,.08);border-radius:10px;padding:.9rem 1rem;margin-bottom:10px}
+.cfr{display:flex;justify-content:space-between;align-items:flex-start;font-size:13px;margin-bottom:6px;gap:8px}
+.cfr:last-child{margin-bottom:0}
+.cfl{color:rgba(255,255,255,.6);flex:1}
+.cfv{font-weight:600;color:#fff;text-align:right}
+.pos-best{color:#9FE1CB}
+.pos-fair{color:#FAC775}
+.pos-poor{color:#F7C1C1}
+
+/* Summary */
+.summary-hero{background:#042C53;border:1px solid rgba(133,183,235,.4);border-radius:16px;padding:1.5rem 1rem;text-align:center;margin-bottom:1rem}
+.hero-label{font-size:13px;color:#85B7EB;margin-bottom:6px}
+.hero-val{font-size:44px;font-weight:800;color:#fff;line-height:1}
+.hero-sub{font-size:13px;color:#85B7EB;margin-top:6px}
+.period-row{display:flex;gap:8px;margin-bottom:1rem}
+.ptab{flex:1;padding:12px 6px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.6);font-size:14px;font-weight:500;cursor:pointer;text-align:center}
+.ptab.active{border-color:#85B7EB;background:rgba(133,183,235,.15);color:#fff}
+.cmp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.cmp-col{border-radius:12px;padding:1rem}
+.cmp-before{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.cmp-after{background:rgba(133,183,235,.15);border:1px solid rgba(133,183,235,.4)}
+.cmp-col h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.75rem}
+.cmp-before h3{color:rgba(255,255,255,.45)}
+.cmp-after h3{color:#85B7EB}
+.cmp-line{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;gap:6px}
+.cml{color:rgba(255,255,255,.55);flex:1}
+.cmv{font-weight:600;color:#fff}
+.cmp-total{border-top:1px solid rgba(255,255,255,.15);padding-top:6px;margin-top:4px}
+.delta-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.delta-tbl th{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-align:left;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.12)}
+.delta-tbl th:not(:first-child){text-align:right}
+.delta-tbl td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
+.delta-tbl td:not(:first-child){text-align:right}
+.delta-pos{color:#9FE1CB;font-weight:600}
+.zone-row{display:flex;align-items:center;gap:8px;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.zone-row:last-child{border-bottom:none}
+.zone-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.clv-card{background:rgba(29,158,117,.2);border:1px solid rgba(29,158,117,.4);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.clv-line{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;gap:6px}
+.clvl{color:rgba(255,255,255,.6);flex:1}
+.clvv{font-weight:600;color:#fff}
+.clv-total{border-top:1px solid rgba(29,158,117,.4);padding-top:6px;margin-top:4px}
+.comp-banner{display:none;border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;font-size:13px;color:#FAC775;background:rgba(239,159,39,.15);border:1px solid rgba(239,159,39,.3)}
+
+/* Save section */
+.save-status{font-size:12px;margin-top:8px;padding:8px 12px;border-radius:8px;text-align:center}
+.save-status.success{color:#9FE1CB;background:rgba(29,158,117,.15)}
+.save-status.offline{color:#FFD580;background:rgba(255,213,128,.15)}
+.save-status.error{color:#F09595;background:rgba(240,149,149,.15)}
+.queue-count{font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-top:6px}
+.btn-save:disabled{opacity:.45;cursor:not-allowed}
+
+/* References */
+.ref-item{padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:13px;line-height:1.5}
+.ref-item:last-child{border-bottom:none}
+.ref-src{font-weight:600;color:#fff}
+.ref-det{color:rgba(255,255,255,.55);margin-top:3px;font-size:12px}
+.ref-bdg{display:inline-block;font-size:10px;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle;background:rgba(61,193,168,.2);color:#9FE1CB}
+.ref-bdg.est{background:rgba(239,159,39,.2);color:#FAC775}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">ECN Convenience Store Revenue Potential</div>
+  <div class="app-sub">EyeCatch Networks — field sales tool</div>
+  <div class="store-name-sub" id="store-name-display"></div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab-item active" onclick="goTab(0)">1 · Store info</div>
+  <div class="tab-item" onclick="goTab(1)">2 · Competition</div>
+  <div class="tab-item" onclick="goTab(2)">3 · ECN impact</div>
+  <div class="tab-item" onclick="goTab(3)">4 · Display zones</div>
+  <div class="tab-item" onclick="goTab(4)">5 · Summary</div>
+  <div class="tab-item" onclick="goTab(5)">References</div>
+</div>
+
+<!-- TAB 0 -->
+<div id="tab-0" class="tab-content active">
+  <div class="sec-label">Sales representative</div>
+  <div class="card">
+    <div class="field-group">
+      <label class="field-label">Sales person</label>
+      <select id="f_salesperson" class="big-input" style="font-size:16px;text-align:left">
+        <option value="">Select sales person…</option>
+        <option>Alfredo Munera</option>
+        <option>Carlos Roa</option>
+        <option>Clinton Roudenbush</option>
+        <option>David Defelici</option>
+        <option>Jean Pierre Albrecht</option>
+        <option>Marcela Giraldo</option>
+        <option>Matthew Diersen</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sec-label">Prospect contact <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4)">(optional — fill all or none)</span></div>
+  <div class="card">
+    <div class="field-group">
+      <label class="field-label">Company name</label>
+      <input type="text" id="f_storename" class="big-input" style="font-size:16px;text-align:left" placeholder="e.g. Sunshine Fuel &amp; Go" oninput="updateStoreName()">
+    </div>
+    <div class="grid2">
+      <div class="field-group">
+        <label class="field-label">First name</label>
+        <input type="text" id="f_fname" class="big-input" style="font-size:16px;text-align:left" placeholder="First" oninput="validateContact()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Last name</label>
+        <input type="text" id="f_lname" class="big-input" style="font-size:16px;text-align:left" placeholder="Last" oninput="validateContact()">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email</label>
+      <input type="email" id="f_email" class="big-input" style="font-size:16px;text-align:left" placeholder="email@example.com" oninput="validateContact()">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Phone</label>
+      <input type="tel" id="f_phone" class="big-input" style="font-size:16px;text-align:left" placeholder="(555) 555-5555" oninput="validateContact()">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Street address</label>
+      <input type="text" id="f_street" class="big-input" style="font-size:16px;text-align:left" placeholder="123 Main St" oninput="validateContact()">
+    </div>
+    <div class="grid2">
+      <div class="field-group">
+        <label class="field-label">City</label>
+        <input type="text" id="f_city" class="big-input" style="font-size:16px;text-align:left" placeholder="City" oninput="validateContact()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">State</label>
+        <input type="text" id="f_state" class="big-input" style="font-size:16px;text-align:left" placeholder="FL" maxlength="2" oninput="validateContact()">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Zip code</label>
+      <input type="text" id="f_zip" class="big-input" style="font-size:16px;text-align:left" placeholder="33157" maxlength="10" oninput="validateContact()">
+    </div>
+    <div id="contact-warning" class="contact-warn">All contact fields must be filled out together, or leave all blank.</div>
+    <div class="field-group" style="margin-top:1.1rem">
+      <label class="field-label">Notes</label>
+      <textarea id="f_notes" class="big-input" style="font-size:14px;text-align:left;min-height:80px;resize:vertical" placeholder="Additional notes…"></textarea>
+    </div>
+  </div>
+
+  <div class="sec-label">Property</div>
+  <div class="card">
+    <div class="grid2">
+      <div class="field-group">
+        <label class="field-label">Daily road traffic (DOT AADT)</label>
+        <input type="number" id="f_traffic" class="big-input" value="10000" oninput="V.traffic=+this.value||0;updateCapture()">
+        <div class="field-note">Vehicles/day past property</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fuel price ($/gal)</label>
+        <input type="number" id="f_fuelprice" class="big-input" value="3.31" step="0.05" oninput="V.fuelprice=+this.value||0">
+        <div class="field-note">EIA 2024 avg $3.31</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">Ask the prospect</div>
+  <div class="card">
+    <div class="field-group">
+      <label class="field-label">Daily fuel transactions</label>
+      <input type="number" id="f_fillups" class="big-input" value="320" oninput="V.fillups=+this.value||0;updateCapture()">
+      <div class="field-note">Median ~320/day · NACS avg ~480/day</div>
+      <div class="dbadge">Capture rate: <strong id="capture-derived">—</strong></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Daily in-store transactions</label>
+      <input type="number" id="f_basefoot" class="big-input" value="560" oninput="V.basefoot=+this.value||0;updateCapture()">
+      <div class="field-note">Median ~560/day · NACS avg ~1,100/day</div>
+      <div class="dbadge">Store/pump ratio: <strong id="ratio-derived">—</strong></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Avg in-store basket size ($)</label>
+      <input type="number" id="f_basket" class="big-input" value="7.80" step="0.10" oninput="V.basket=+this.value||0">
+      <div class="field-note">NACS 2023 avg $7.80</div>
+    </div>
+  </div>
+
+  <div class="nav-row" style="justify-content:flex-end">
+    <button class="btn-primary" style="max-width:220px" onclick="goTab(1)">Next: Competition →</button>
+  </div>
+</div>
+
+<!-- TAB 1 -->
+<div id="tab-1" class="tab-content">
+  <div class="step-hint" id="comp-hint">Step 1: Tap the corner where this C-store is located.</div>
+  <div style="display:grid;grid-template-columns:1fr 56px 1fr;grid-template-rows:auto 56px auto;width:100%;margin:1rem 0;gap:0">
+    <div id="btn-NW" class="corner-btn" style="border-radius:12px 0 0 0" onclick="cornerClick('NW')">
+      <div class="corner-lbl">NW</div>
+      <div class="corner-sub" id="sub-NW">Tap to set</div>
+      <div class="corner-badge cb-empty" id="badge-NW">empty</div>
+    </div>
+    <div style="background:rgba(255,255,255,.08);border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px">
+      <span class="road-lbl">N</span>
+    </div>
+    <div id="btn-NE" class="corner-btn" style="border-radius:0 12px 0 0" onclick="cornerClick('NE')">
+      <div class="corner-lbl">NE</div>
+      <div class="corner-sub" id="sub-NE">Tap to set</div>
+      <div class="corner-badge cb-empty" id="badge-NE">empty</div>
+    </div>
+    <div style="background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:flex-end;padding-right:8px">
+      <span class="road-lbl">W</span>
+    </div>
+    <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)"></div>
+    <div style="background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:flex-start;padding-left:8px">
+      <span class="road-lbl">E</span>
+    </div>
+    <div id="btn-SW" class="corner-btn" style="border-radius:0 0 0 12px" onclick="cornerClick('SW')">
+      <div class="corner-lbl">SW</div>
+      <div class="corner-sub" id="sub-SW">Tap to set</div>
+      <div class="corner-badge cb-empty" id="badge-SW">empty</div>
+    </div>
+    <div style="background:rgba(255,255,255,.08);border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15);display:flex;align-items:flex-start;justify-content:center;padding-top:6px">
+      <span class="road-lbl">S</span>
+    </div>
+    <div id="btn-SE" class="corner-btn" style="border-radius:0 0 12px 0" onclick="cornerClick('SE')">
+      <div class="corner-lbl">SE</div>
+      <div class="corner-sub" id="sub-SE">Tap to set</div>
+      <div class="corner-badge cb-empty" id="badge-SE">empty</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Homeward bound direction</div>
+  <div class="card">
+    <div class="dir-grid">
+      <button class="dir-btn active" data-dir="none" onclick="setHomeDir('none')">None</button>
+      <button class="dir-btn" data-dir="N" onclick="setHomeDir('N')">Northbound</button>
+      <button class="dir-btn" data-dir="S" onclick="setHomeDir('S')">Southbound</button>
+      <button class="dir-btn" data-dir="E" onclick="setHomeDir('E')">Eastbound</button>
+      <button class="dir-btn" data-dir="W" onclick="setHomeDir('W')">Westbound</button>
+    </div>
+  </div>
+
+  <div class="sec-label">Competitive position</div>
+  <div id="comp-factors-body">
+    <div class="card" style="color:rgba(255,255,255,.5);font-size:13px">Tap client corner above to see analysis.</div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-secondary" onclick="goTab(0)">← Back</button>
+    <button class="btn-primary" onclick="goTab(2)">Next: ECN impact →</button>
+  </div>
+</div>
+
+<!-- TAB 2 -->
+<div id="tab-2" class="tab-content">
+  <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:1rem">All sliders start below industry average. The <span style="color:#FFD580;font-weight:600">▲</span> mark shows the average. Slide up to show full potential.</div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Monument sign — additional traffic capture</div>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="slider-label">Capture rate lift above baseline <span class="bdg bdg-est">est</span></span>
+        <span class="slider-val" id="v_monument">+1.3%</span>
+      </div>
+      <div class="slider-track" id="wrap_monument">
+        <input type="range" id="s_monument" min="0.5" max="8" step="0.1" value="1.3" oninput="sync('monument',this.value)">
+        <div class="avg-tick-wrap" id="avg_monument"><div class="avg-tick"></div><div class="avg-lbl">avg 2.5%</div></div>
+      </div>
+    </div>
+    <div class="source-note">OOH/LED est. 2–5% diversion above baseline capture.</div>
+    <div class="dbadge">ECN adds <strong id="ecn-pumps-derived">—</strong> new pump visits/day</div>
+
+    <div class="sec-label">Gallons per fill-up</div>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="slider-label">Avg gallons/fill-up <span class="bdg bdg-solid">API/EIA</span></span>
+        <span class="slider-val" id="v_gallons">8.3 gal</span>
+      </div>
+      <div class="slider-track" id="wrap_gallons">
+        <input type="range" id="s_gallons" min="6" max="16" step="0.5" value="8.3" oninput="sync('gallons',this.value)">
+        <div class="avg-tick-wrap" id="avg_gallons"><div class="avg-tick"></div><div class="avg-lbl">avg 10.5</div></div>
+      </div>
+    </div>
+    <div class="source-note">National avg ~10.5 gal (API/EIA). Range 6–16 gal.</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Window displays — pump-to-store conversion</div>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="slider-label">Additional pump → store boost <span class="bdg bdg-est">est</span></span>
+        <span class="slider-val" id="v_window">+3.5%</span>
+      </div>
+      <div class="slider-track" id="wrap_window">
+        <input type="range" id="s_window" min="1" max="20" step="0.5" value="3.5" oninput="sync('window',this.value)">
+        <div class="avg-tick-wrap" id="avg_window"><div class="avg-tick"></div><div class="avg-lbl">avg 7%</div></div>
+      </div>
+    </div>
+    <div class="source-note">Daylight-visible LED window displays. Est. 3–12% incremental.</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">In-store screens — basket lift</div>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="slider-label">Digital signage basket lift <span class="bdg bdg-solid">peer-reviewed</span></span>
+        <span class="slider-val" id="v_lift">4.1%</span>
+      </div>
+      <div class="slider-track" id="wrap_lift">
+        <input type="range" id="s_lift" min="3" max="40" step="0.5" value="4.1" oninput="sync('lift',this.value)">
+        <div class="avg-tick-wrap" id="avg_lift"><div class="avg-tick"></div><div class="avg-lbl">avg 8.1%</div></div>
+      </div>
+    </div>
+    <div class="source-note">Journal of Marketing 2025, 30M shoppers: 8.1% baseline.</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Customer lifetime value</div>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="slider-label">LTV per new loyal customer <span class="bdg bdg-est">modeled</span></span>
+        <span class="slider-val" id="v_clv">$225</span>
+      </div>
+      <div class="slider-track" id="wrap_clv">
+        <input type="range" id="s_clv" min="50" max="2000" step="10" value="225" oninput="sync('clv',this.value)">
+        <div class="avg-tick-wrap" id="avg_clv"><div class="avg-tick"></div><div class="avg-lbl">avg $450</div></div>
+      </div>
+    </div>
+    <div class="source-note">$94 new loyalty member floor (Paytronix). Full loyal customer $450–$800+.</div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-secondary" onclick="goTab(1)">← Back</button>
+    <button class="btn-primary" onclick="goTab(3)">Next: Display zones →</button>
+  </div>
+</div>
+
+<!-- TAB 3 -->
+<div id="tab-3" class="tab-content">
+  <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:1rem">Tap zones to include or exclude from the revenue model.</div>
+  <div class="zone-grid">
+    <div class="zone-btn active" data-zone="monument" onclick="toggleZone(this)">
+      <div class="zn">Monument sign</div>
+      <div class="zd">LED roadside</div>
+      <div class="zi">Street → pump</div>
+    </div>
+    <div class="zone-btn active" data-zone="window" onclick="toggleZone(this)">
+      <div class="zn">Window displays</div>
+      <div class="zd">Daylight LED</div>
+      <div class="zi">Pump → store</div>
+    </div>
+    <div class="zone-btn active" data-zone="instore" onclick="toggleZone(this)">
+      <div class="zn">In-store screens</div>
+      <div class="zd">Menu, cooler, cashier</div>
+      <div class="zi">Basket lift</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn-secondary" onclick="goTab(2)">← Back</button>
+    <button class="btn-primary" onclick="goTab(4)">View summary →</button>
+  </div>
+</div>
+
+<!-- TAB 4 -->
+<div id="tab-4" class="tab-content">
+  <div class="period-row">
+    <button class="ptab active" onclick="setPeriod('daily')">Daily</button>
+    <button class="ptab" onclick="setPeriod('monthly')">Monthly</button>
+    <button class="ptab" onclick="setPeriod('annual')">Annual</button>
+  </div>
+
+  <div class="summary-hero">
+    <div class="hero-label">Incremental revenue opportunity with ECN</div>
+    <div class="hero-val" id="s_delta_hero">—</div>
+    <div class="hero-sub" id="s_period_hero">per year</div>
+  </div>
+
+  <div id="comp-banner" class="comp-banner"></div>
+
+  <div class="cmp-row">
+    <div class="cmp-col cmp-before">
+      <h3>Without ECN</h3>
+      <div class="cmp-line"><span class="cml">Fuel/day</span><span class="cmv" id="s_b_fillups">—</span></div>
+      <div class="cmp-line"><span class="cml">In-store/day</span><span class="cmv" id="s_b_foot">—</span></div>
+      <div class="cmp-line"><span class="cml">Fuel rev</span><span class="cmv" id="s_b_fuelrev">—</span></div>
+      <div class="cmp-line"><span class="cml">Store rev</span><span class="cmv" id="s_b_instorerev">—</span></div>
+      <div class="cmp-line cmp-total"><span class="cml" style="font-weight:600">Total</span><span class="cmv" id="s_b_total">—</span></div>
+    </div>
+    <div class="cmp-col cmp-after">
+      <h3>With ECN</h3>
+      <div class="cmp-line"><span class="cml">Fuel/day</span><span class="cmv" id="s_a_fillups">—</span></div>
+      <div class="cmp-line"><span class="cml">In-store/day</span><span class="cmv" id="s_a_foot">—</span></div>
+      <div class="cmp-line"><span class="cml">Fuel rev</span><span class="cmv" id="s_a_fuelrev">—</span></div>
+      <div class="cmp-line"><span class="cml">Store rev</span><span class="cmv" id="s_a_instorerev">—</span></div>
+      <div class="cmp-line cmp-total"><span class="cml" style="font-weight:600">Total</span><span class="cmv" id="s_a_total">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Revenue delta</div>
+    <table class="delta-tbl">
+      <thead><tr><th>Source</th><th>Before</th><th>After</th><th>Delta</th></tr></thead>
+      <tbody id="delta-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Zone contribution</div>
+    <div id="zone-summary"></div>
+  </div>
+
+  <div class="clv-card">
+    <div class="sec-label" style="margin-top:0;color:rgba(255,255,255,.55)">Customer lifetime value — long-term upside</div>
+    <div class="clv-line"><span class="clvl">New pump visitors/day</span><span class="clvv" id="s_clv_pumps">—</span></div>
+    <div class="clv-line"><span class="clvl">New loyal customers/month (5%)</span><span class="clvv" id="s_clv_loyal">—</span></div>
+    <div class="clv-line"><span class="clvl">LTV per loyal customer</span><span class="clvv" id="s_clv_each">—</span></div>
+    <div class="clv-line clv-total"><span class="clvl" style="font-weight:600">LTV added per month</span><span class="clvv delta-pos" id="s_clv_total">—</span></div>
+  </div>
+
+  <div id="save-section" style="margin-top:1rem">
+    <button id="save-btn" class="btn-primary btn-save" style="width:100%;margin-bottom:10px" onclick="saveRecord()">Save prospect record</button>
+    <button class="btn-secondary" style="width:100%;margin-bottom:10px" onclick="downloadCSV()">Download CSV log</button>
+    <div id="save-status" class="save-status" style="display:none"></div>
+    <div id="queue-count" class="queue-count"></div>
+  </div>
+
+  <div class="nav-row" style="justify-content:flex-start">
+    <button class="btn-secondary" style="max-width:150px" onclick="goTab(3)">← Back</button>
+  </div>
+</div>
+
+<!-- TAB 5 -->
+<div id="tab-5" class="tab-content">
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Industry benchmarks</div>
+    <div class="ref-item"><div class="ref-src">NACS State of the Industry 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">1,491 combined daily transactions/store. Basket $7.80. In-store $327.6B, fuel $532.2B. Source: convenience.org</div></div>
+    <div class="ref-item"><div class="ref-src">NACS / NIQ 2024 State of Convenience <span class="ref-bdg">solid</span></div><div class="ref-det">165M daily C-store visits. Total 2024 sales $837.4B. Avg gas price $3.31/gal. Source: nielseniq.com</div></div>
+    <div class="ref-item"><div class="ref-src">Convenience Store News 2024–2025 <span class="ref-bdg">solid</span></div><div class="ref-det">In-store 38.8% of revenue, 60.7% of gross profit. Fuel 61.2% of revenue, 39.3% of gross profit. Source: csnews.com</div></div>
+    <div class="ref-item"><div class="ref-src">MMCG Invest — Gas Station P&L Database 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">Median store: fuel rev ~$4.77M/yr, C-store ~$1.08M/yr, combined ~$5.86M/yr. ~320 fuel/day, ~560 in-store/day. Source: mmcginvest.com</div></div>
+    <div class="ref-item"><div class="ref-src">Statista / CSNews — Weekly Transactions 2022 <span class="ref-bdg">solid</span></div><div class="ref-det">Small operators: 3,356 in-store/week vs. 1,983 fuel/week. In-store avg $12.12; fuel avg $41.67. Source: statista.com</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Fuel & traffic data</div>
+    <div class="ref-item"><div class="ref-src">API / EIA — Gasoline Demand 2022 <span class="ref-bdg">solid</span></div><div class="ref-det">38.9M fill-ups/day nationally. Avg 9.5–11.7 gal/fill-up. EIA 2024 avg price $3.31/gal. Source: api.org, eia.gov</div></div>
+    <div class="ref-item"><div class="ref-src">LookUpAPlate — Gas Station Statistics 2025 <span class="ref-bdg">solid</span></div><div class="ref-det">44% of fuel customers enter the C-store. Non-fuel = ~30% revenue but ~70% profit. Source: lookupaplate.com</div></div>
+    <div class="ref-item"><div class="ref-src">MMCG Analytics — Traffic Capture Rate <span class="ref-bdg est">estimated</span></div><div class="ref-det">Capture rate (road traffic → pump): 0.5–3%. Derived from AADT and transaction volume cross-reference. Source: mmcganalytics.com</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Digital signage effectiveness</div>
+    <div class="ref-item"><div class="ref-src">Herhausen, de Jong, Grewal — Journal of Marketing 2025 <span class="ref-bdg">solid</span></div><div class="ref-det">237 campaigns, 30M shoppers. Digital signage increases purchase probability by 8.1%. Source: journals.sagepub.com</div></div>
+    <div class="ref-item"><div class="ref-src">AIScreen / SeenLabs 2025 <span class="ref-bdg est">estimated</span></div><div class="ref-det">Avg 29.5–32% sales increase (industry self-reported). Menu board highlight: +15% on featured item. Source: aiscreen.io</div></div>
+    <div class="ref-item"><div class="ref-src">Samsung Business Insights 2025 <span class="ref-bdg est">estimated</span></div><div class="ref-det">29.5% sales increase, 52% ad recall boost, 70% of customers influenced by digital signage. Source: insights.samsung.com</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Customer lifetime value</div>
+    <div class="ref-item"><div class="ref-src">Paytronix Loyalty Report 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">New loyalty member CLV: $94. By third visit CLV increases significantly. Loyalty checks 12% higher. Source: paytronix.com</div></div>
+    <div class="ref-item"><div class="ref-src">NIQ / NACS Consumer Behavior 2024 <span class="ref-bdg">solid</span></div><div class="ref-det">Avg fill-up frequency: 2.3x/month. Avg C-store shopper visits 3+ times/week. Source: nielseniq.com</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Competitive economics</div>
+    <div class="ref-item"><div class="ref-src">Hotelling — Economic Journal 1929 <span class="ref-bdg">solid</span></div><div class="ref-det">Spatial competition model. Competitors cluster at median market position (Nash Equilibrium). Explains gas station co-location.</div></div>
+    <div class="ref-item"><div class="ref-src">Maskin &amp; Tirole 1988 / Noel 2007 <span class="ref-bdg">solid</span></div><div class="ref-det">Edgeworth Price Cycles: sawtooth pricing in duopoly/triopoly fuel markets. Triopoly adds coordination problems. Source: peer-reviewed journals</div></div>
+    <div class="ref-item"><div class="ref-src">Dallas Fed Working Paper 2025 <span class="ref-bdg">solid</span></div><div class="ref-det">New competitor entry → 2.5¢ price drop at incumbents (~7% markup reduction). Effect immediate and persistent. Source: dallasfed.org</div></div>
+    <div class="ref-item"><div class="ref-src">Assad et al. — Journal of Political Economy 2024 <span class="ref-bdg">solid</span></div><div class="ref-det">Duopoly margins increase 28% when both stations adopt algorithmic pricing. Source: journals.uchicago.edu</div></div>
+    <div class="ref-item"><div class="ref-src">Site Selection Industry Practice <span class="ref-bdg est">estimated</span></div><div class="ref-det">Right-turn-in corner advantage on homeward traffic. Corner multipliers are practitioner estimates. Sources: mmcginvest.com, kalibrate.com</div></div>
+    <div class="ref-item"><div class="ref-src">Penneco Outdoor / OAAA <span class="ref-bdg est">estimated</span></div><div class="ref-det">32% purchase within a week of billboard exposure. Monument sign diversion est. 2–5%. Source: pennecooutdoor.com</div></div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:.5rem;padding-bottom:1rem">Green = peer-reviewed / major trade association. Amber = industry estimate or self-reported survey.</div>
+</div>
+
+<script>
+var V = {
+  traffic:10000, fuelprice:3.31, fillups:320, basefoot:560,
+  basket:7.80, monument:1.3, window:3.5, lift:4.1, clv:225, gallons:8.3
+};
+var activeZones = {monument:true, window:true, instore:true};
+var period = 'daily';
+var periodMult = {daily:1, monthly:30, annual:365};
+var periodLabel = {daily:'per day', monthly:'per month', annual:'per year'};
+var corners = {NW:null, NE:null, SW:null, SE:null};
+var clientCorner = null;
+var homeDir = 'none';
+var compStep = 1;
+
+var avgMarkers = {
+  monument:{val:2.5,min:0.5,max:8},
+  gallons:{val:10.5,min:6,max:16},
+  window:{val:7,min:1,max:20},
+  lift:{val:8.1,min:3,max:40},
+  clv:{val:450,min:50,max:2000}
+};
+
+var rightTurnMap = {
+  N:{best:['SE','NE'],fair:['SW'],poor:['NW']},
+  S:{best:['SW','NW'],fair:['NE'],poor:['SE']},
+  E:{best:['SW','SE'],fair:['NE'],poor:['NW']},
+  W:{best:['NE','NW'],fair:['SW'],poor:['SE']},
+  none:{best:['NW','NE','SW','SE'],fair:[],poor:[]}
+};
+
+function set(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+function fmtN(n) { return Math.round(n).toLocaleString(); }
+
+function positionMarkers() {
+  Object.keys(avgMarkers).forEach(function(key) {
+    var cfg = avgMarkers[key];
+    var wrap = document.getElementById('wrap_' + key);
+    var marker = document.getElementById('avg_' + key);
+    if (!wrap || !marker) return;
+    var pct = (cfg.val - cfg.min) / (cfg.max - cfg.min);
+    var thumbW = 32;
+    marker.style.left = (thumbW / 2 + pct * (wrap.offsetWidth - thumbW)) + 'px';
+  });
+}
+
+function validateContact() {
+  var fields = ['f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'];
+  var vals = fields.map(function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; });
+  var filled = vals.filter(function(v) { return v.length > 0; }).length;
+  var warn = document.getElementById('contact-warning');
+  var partial = filled > 0 && filled < fields.length;
+  if (warn) warn.style.display = partial ? 'block' : 'none';
+  fields.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (el) el.style.borderColor = partial && !vals[i] ? '#F09595' : '';
+  });
+}
+
+function updateCapture() {
+  var rate = V.traffic > 0 ? (V.fillups / V.traffic * 100) : 0;
+  var el = document.getElementById('capture-derived');
+  if (el) el.textContent = rate.toFixed(2) + '%';
+  var rel = document.getElementById('ratio-derived');
+  if (rel && V.fillups > 0) rel.textContent = (V.basefoot / V.fillups).toFixed(2) + 'x';
+  var ep = document.getElementById('ecn-pumps-derived');
+  if (ep) ep.textContent = Math.round(V.traffic * (V.monument / 100)).toLocaleString();
+}
+
+function updateStoreName() {
+  var n = document.getElementById('f_storename').value.trim();
+  document.getElementById('store-name-display').textContent = n ? n : '';
+}
+
+function sync(key, val) {
+  V[key] = parseFloat(val);
+  var s = document.getElementById('s_' + key);
+  var v = document.getElementById('v_' + key);
+  if (s) s.value = val;
+  if (v) {
+    var f = parseFloat(val);
+    if (key === 'gallons') v.textContent = f.toFixed(1) + ' gal';
+    else if (key === 'clv') v.textContent = '$' + Math.round(f).toLocaleString();
+    else if (key === 'window' || key === 'lift') v.textContent = f.toFixed(1) + '%';
+    else if (key === 'monument') v.textContent = '+' + f.toFixed(1) + '%';
+  }
+  if (key === 'monument') updateCapture();
+}
+
+function toggleZone(el) {
+  var z = el.dataset.zone;
+  activeZones[z] = !activeZones[z];
+  el.classList.toggle('active', activeZones[z]);
+}
+
+function goTab(n) {
+  document.querySelectorAll('.tab-content').forEach(function(el, i) {
+    el.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.tab-item').forEach(function(el, i) {
+    el.classList.toggle('active', i === n);
+  });
+  if (n === 4) { renderSummary(); renderQueueStatus(); }
+  setTimeout(positionMarkers, 80);
+}
+
+function setPeriod(p) {
+  period = p;
+  document.querySelectorAll('.ptab').forEach(function(el) {
+    el.classList.toggle('active', el.textContent.toLowerCase() === p);
+  });
+  renderSummary();
+}
+
+function cornerClick(pos) {
+  if (compStep === 1) {
+    clientCorner = pos; corners[pos] = 'client'; updateCornerUI(pos, 'client'); compStep = 2;
+    document.getElementById('comp-hint').textContent = 'Step 2: Tap competitor corners. Tap again to clear.';
+  } else {
+    if (corners[pos] === 'client') {
+      corners[pos] = null; clientCorner = null; updateCornerUI(pos, 'empty'); compStep = 1;
+      document.getElementById('comp-hint').textContent = 'Step 1: Tap the corner where this C-store is located.';
+    } else if (corners[pos] === 'competitor') {
+      corners[pos] = null; updateCornerUI(pos, 'empty');
+    } else {
+      corners[pos] = 'competitor'; updateCornerUI(pos, 'competitor');
+    }
+  }
+  renderCompFactors();
+}
+
+function updateCornerUI(pos, state) {
+  var btn = document.getElementById('btn-' + pos);
+  var sub = document.getElementById('sub-' + pos);
+  var badge = document.getElementById('badge-' + pos);
+  btn.className = 'corner-btn' + (state !== 'empty' ? ' ' + state : '');
+  if (state === 'client') { sub.textContent = 'This C-store'; badge.className = 'corner-badge cb-client'; badge.textContent = 'client'; }
+  else if (state === 'competitor') { sub.textContent = 'Competitor'; badge.className = 'corner-badge cb-comp'; badge.textContent = 'competitor'; }
+  else { sub.textContent = 'Tap to set'; badge.className = 'corner-badge cb-empty'; badge.textContent = 'empty'; }
+}
+
+function setHomeDir(dir) {
+  homeDir = dir;
+  document.querySelectorAll('.dir-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.dir === dir); });
+  renderCompFactors();
+}
+
+function getCornerRating(pos, dir) {
+  if (!pos) return null;
+  var m = rightTurnMap[dir] || rightTurnMap.none;
+  if (m.best.indexOf(pos) >= 0) return {label:'Best — right-turn-in on homeward flow', cls:'pos-best', mult:1.20};
+  if (m.fair.indexOf(pos) >= 0) return {label:'Fair — partial access advantage', cls:'pos-fair', mult:1.05};
+  return {label:'Challenging — left-turn on main flow', cls:'pos-poor', mult:0.85};
+}
+
+function getCompInfo() {
+  var count = Object.keys(corners).filter(function(k) { return corners[k] === 'competitor'; }).length;
+  if (count === 0) return {mult:1.15, label:'Monopoly — no direct competitors', count:count};
+  if (count === 1) return {mult:1.0, label:'Duopoly — one direct competitor', count:count};
+  if (count === 2) return {mult:0.92, label:'Triopoly — coordination instability', count:count};
+  return {mult:0.85, label:'Four-corner — maximum competition', count:count};
+}
+
+function renderCompFactors() {
+  var body = document.getElementById('comp-factors-body');
+  if (!clientCorner) { body.innerHTML = '<div class="card" style="color:rgba(255,255,255,.5);font-size:13px">Tap client corner above to see analysis.</div>'; return; }
+  var pos = getCornerRating(clientCorner, homeDir);
+  var comp = getCompInfo();
+  var totalMult = pos.mult * comp.mult;
+  var pct = Math.round((totalMult - 1) * 100);
+  var pctColor = totalMult >= 1.08 ? '#9FE1CB' : totalMult >= 0.97 ? '#FAC775' : '#F09595';
+  var bgAlpha = totalMult >= 1.08 ? 'rgba(29,158,117,.2)' : totalMult >= 0.97 ? 'rgba(239,159,39,.15)' : 'rgba(240,149,149,.15)';
+  body.innerHTML =
+    '<div class="comp-factor-card">' +
+      '<div class="cfr"><span class="cfl">Client corner</span><span class="cfv ' + pos.cls + '">' + clientCorner + '</span></div>' +
+      '<div class="cfr"><span class="cfl">Access vs. homeward flow</span><span class="cfv" style="font-size:12px;text-align:right;max-width:55%">' + pos.label + '</span></div>' +
+      '<div class="cfr"><span class="cfl">Access multiplier</span><span class="cfv" style="color:' + (pos.mult >= 1 ? '#9FE1CB' : '#F09595') + '">' + (pos.mult >= 1 ? '+' : '') + Math.round((pos.mult - 1) * 100) + '%</span></div>' +
+    '</div>' +
+    '<div class="comp-factor-card">' +
+      '<div class="cfr"><span class="cfl">Competitors on other corners</span><span class="cfv">' + comp.count + '</span></div>' +
+      '<div class="cfr"><span class="cfl">Market structure</span><span class="cfv" style="font-size:12px;text-align:right;max-width:55%">' + comp.label + '</span></div>' +
+      '<div class="cfr"><span class="cfl">Competition multiplier</span><span class="cfv" style="color:' + (comp.mult >= 1 ? '#9FE1CB' : '#F09595') + '">' + (comp.mult >= 1 ? '+' : '') + Math.round((comp.mult - 1) * 100) + '%</span></div>' +
+    '</div>' +
+    '<div style="background:' + bgAlpha + ';border-radius:10px;padding:.9rem 1rem">' +
+      '<div class="cfr"><span style="font-size:14px;font-weight:600;color:#fff">Combined ECN adjustment</span><span style="font-size:18px;font-weight:700;color:' + pctColor + '">' + (pct >= 0 ? '+' : '') + pct + '%</span></div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px">Applied to monument sign traffic capture.</div>' +
+    '</div>';
+}
+
+function compMultiplier() {
+  if (!clientCorner) return 1.0;
+  return getCornerRating(clientCorner, homeDir).mult * getCompInfo().mult;
+}
+
+function model() {
+  var cm = compMultiplier();
+  var baseFuelRev = V.fillups * V.gallons * V.fuelprice;
+  var baseInstoreRev = V.basefoot * V.basket;
+  var baseTotalDay = baseFuelRev + baseInstoreRev;
+  var ecnPumps = (activeZones.monument ? V.traffic * (V.monument / 100) : 0) * cm;
+  var windowBoost = activeZones.window ? V.window / 100 : 0;
+  var baseP2S = V.fillups > 0 ? Math.min(V.basefoot / V.fillups, 0.95) : 0.44;
+  var ecnInstore = ecnPumps * Math.min(baseP2S + windowBoost, 0.95);
+  var basketLift = activeZones.instore ? V.basefoot * V.basket * (V.lift / 100) : 0;
+  var ecnFuelRev = ecnPumps * V.gallons * V.fuelprice;
+  var ecnInstoreNew = ecnInstore * V.basket;
+  var ecnTotal = ecnFuelRev + ecnInstoreNew + basketLift;
+  var loyal = ecnPumps * 30 * 0.05;
+  return {
+    baseFuelRev:baseFuelRev, baseInstoreRev:baseInstoreRev, baseTotalDay:baseTotalDay,
+    ecnPumps:ecnPumps, ecnInstore:ecnInstore, ecnFuelRev:ecnFuelRev,
+    ecnInstoreNew:ecnInstoreNew, basketLift:basketLift, ecnTotal:ecnTotal,
+    afterFuelRev:baseFuelRev+ecnFuelRev, afterInstoreRev:baseInstoreRev+ecnInstoreNew+basketLift,
+    afterTotal:baseFuelRev+ecnFuelRev+baseInstoreRev+ecnInstoreNew+basketLift,
+    newLoyalPerMonth:loyal, clvMonthly:loyal*V.clv, cm:cm
+  };
+}
+
+function renderSummary() {
+  var m = model();
+  var pMult = periodMult[period];
+  var pl = periodLabel[period];
+
+  set('s_delta_hero', fmt(m.ecnTotal * pMult));
+  set('s_period_hero', pl);
+  var hero = document.querySelector('.summary-hero');
+  if (hero) {
+    if (m.ecnTotal > 0) {
+      hero.style.background = '#0F6E56';
+      hero.style.borderColor = 'rgba(159,225,203,.4)';
+    } else {
+      hero.style.background = '#042C53';
+      hero.style.borderColor = 'rgba(133,183,235,.4)';
+    }
+  }
+  set('s_b_fillups', fmtN(V.fillups) + '/day');
+  set('s_b_foot', fmtN(V.basefoot) + '/day');
+  set('s_b_fuelrev', fmt(m.baseFuelRev));
+  set('s_b_instorerev', fmt(m.baseInstoreRev));
+  set('s_b_total', fmt(m.baseTotalDay));
+  set('s_a_fillups', fmtN(Math.round(V.fillups + m.ecnPumps)) + '/day');
+  set('s_a_foot', fmtN(Math.round(V.basefoot + m.ecnInstore)) + '/day');
+  set('s_a_fuelrev', fmt(m.afterFuelRev));
+  set('s_a_instorerev', fmt(m.afterInstoreRev));
+  set('s_a_total', fmt(m.afterTotal));
+
+  var banner = document.getElementById('comp-banner');
+  if (clientCorner && m.cm !== 1.0) {
+    var pct = Math.round(Math.abs(m.cm - 1) * 100);
+    var pos = getCornerRating(clientCorner, homeDir);
+    var comp = getCompInfo();
+    banner.style.display = 'block';
+    banner.textContent = 'Competition adjustment: ' + (m.cm > 1 ? '+' : '-') + pct + '% — ' + pos.label.toLowerCase() + '. ' + comp.label + '.';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  var rows = [
+    {label:'Fuel revenue', before:m.baseFuelRev, after:m.afterFuelRev},
+    {label:'In-store (new visits)', before:0, after:m.ecnInstoreNew},
+    {label:'Basket lift (signage)', before:0, after:m.basketLift},
+    {label:'Total daily', before:m.baseTotalDay, after:m.afterTotal, bold:true}
+  ];
+  var tbody = document.getElementById('delta-tbody');
+  if (tbody) {
+    tbody.innerHTML = rows.map(function(r) {
+      var d = (r.after - r.before) * pMult;
+      return '<tr style="' + (r.bold ? 'background:rgba(255,255,255,.05)' : '') + '">' +
+        '<td style="' + (r.bold ? 'font-weight:600' : '') + '">' + r.label + '</td>' +
+        '<td>' + fmt(r.before * pMult) + '</td>' +
+        '<td>' + fmt(r.after * pMult) + '</td>' +
+        '<td class="delta-pos">' + (d > 0 ? '+' : '') + fmt(d) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  var zs = document.getElementById('zone-summary');
+  if (zs) {
+    var zconf = {
+      monument:{name:'Monument sign', color:'#85B7EB'},
+      window:{name:'Window displays', color:'#9FE1CB'},
+      instore:{name:'In-store screens', color:'#FAC775'}
+    };
+    var html = '';
+    Object.keys(zconf).forEach(function(z) {
+      if (!activeZones[z]) return;
+      var cfg = zconf[z];
+      var rev = 0, ls = '';
+      if (z === 'monument') { rev = m.ecnFuelRev + m.ecnInstoreNew * 0.5; ls = '+' + V.monument.toFixed(1) + '% capture'; }
+      else if (z === 'window') { rev = m.ecnInstoreNew * 0.5; ls = '+' + V.window.toFixed(1) + '% pump→store'; }
+      else { rev = m.basketLift; ls = '+' + V.lift.toFixed(1) + '% basket'; }
+      html += '<div class="zone-row">' +
+        '<div class="zone-dot" style="background:' + cfg.color + '"></div>' +
+        '<span style="font-size:13px;flex:1;color:#fff">' + cfg.name + '</span>' +
+        '<span style="font-size:12px;color:#85B7EB;min-width:90px;text-align:right">' + ls + '</span>' +
+        '<span style="font-size:13px;font-weight:600;color:#fff;min-width:70px;text-align:right">' + fmt(rev * pMult) + '</span>' +
+      '</div>';
+    });
+    zs.innerHTML = html || '<div style="font-size:13px;color:rgba(255,255,255,.4)">No active zones.</div>';
+  }
+
+  set('s_clv_pumps', fmtN(Math.round(m.ecnPumps)) + '/day');
+  set('s_clv_loyal', fmtN(Math.round(m.newLoyalPerMonth)) + ' customers');
+  set('s_clv_each', fmt(V.clv));
+  set('s_clv_total', fmt(m.clvMonthly) + '/mo');
+}
+
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Oa5TpejFs1zSHDXL2-ufbk9iNMv3dLAP5bORo-_sC9ujwbbJsqKd8-cce7W94OU/exec';
+var STORAGE_KEY = 'ecn_submission_queue';
+
+function val(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function isContactComplete() {
+  var fields = ['f_storename','f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'];
+  return fields.every(function(id) { return val(id).length > 0; });
+}
+
+function buildRecord() {
+  var m = model();
+  var comp = getCompInfo();
+  var pos = clientCorner ? getCornerRating(clientCorner, homeDir) : {mult:1.0};
+  var now = new Date().toISOString().slice(0,19);
+  return {
+    timestamp: now,
+    sales_person: val('f_salesperson'),
+    company_name: val('f_storename'),
+    first_name: val('f_fname'),
+    last_name: val('f_lname'),
+    email: val('f_email'),
+    phone: val('f_phone'),
+    street: val('f_street'),
+    city: val('f_city'),
+    state: val('f_state'),
+    zip: val('f_zip'),
+    notes: val('f_notes'),
+    daily_traffic: V.traffic,
+    fuel_price: V.fuelprice,
+    daily_fuel_transactions: V.fillups,
+    daily_instore_transactions: V.basefoot,
+    basket_size: V.basket,
+    baseline_capture_rate_pct: V.traffic > 0 ? (V.fillups/V.traffic*100).toFixed(2) : 0,
+    client_corner: clientCorner || 'not set',
+    homeward_direction: homeDir,
+    competitor_count: comp.count,
+    market_structure: comp.label.split('—')[0].trim(),
+    corner_multiplier: clientCorner ? pos.mult : 1.0,
+    competition_multiplier: comp.mult,
+    combined_multiplier: compMultiplier(),
+    monument_lift_pct: V.monument,
+    gallons_per_fillup: V.gallons,
+    window_boost_pct: V.window,
+    basket_lift_pct: V.lift,
+    customer_ltv: V.clv,
+    zone_monument: activeZones.monument,
+    zone_window: activeZones.window,
+    zone_instore: activeZones.instore,
+    incremental_daily: Math.round(m.ecnTotal),
+    incremental_monthly: Math.round(m.ecnTotal * 30),
+    incremental_annual: Math.round(m.ecnTotal * 365),
+    baseline_daily_total: Math.round(m.baseTotalDay),
+    ecn_daily_total: Math.round(m.afterTotal),
+    new_loyal_per_month: Math.round(m.newLoyalPerMonth),
+    ltv_monthly: Math.round(m.clvMonthly),
+    sync_status: 'queued'
+  };
+}
+
+function saveRecord() {
+  var record = buildRecord();
+  addToQueue(record);
+  if (navigator.onLine) {
+    syncQueue();
+  } else {
+    showSaveStatus('offline');
+  }
+  renderQueueStatus();
+}
+
+function addToQueue(record) {
+  var queue = getQueue();
+  queue.push(record);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
+}
+
+function getQueue() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch(e) { return []; }
+}
+
+function syncQueue() {
+  var queue = getQueue();
+  var pending = queue.filter(function(r) { return r.sync_status === 'queued'; });
+  if (pending.length === 0) return;
+
+  var synced = 0;
+  pending.forEach(function(record) {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(record)
+    }).then(function() {
+      record.sync_status = 'synced';
+      synced++;
+      updateQueue(record);
+      if (synced === pending.length) showSaveStatus('synced', synced);
+      renderQueueStatus();
+    }).catch(function() {
+      showSaveStatus('error');
+    });
+  });
+}
+
+function updateQueue(updatedRecord) {
+  var queue = getQueue();
+  queue = queue.map(function(r) {
+    return r.timestamp === updatedRecord.timestamp &&
+           r.email === updatedRecord.email ? updatedRecord : r;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
+}
+
+function showSaveStatus(state, count) {
+  var el = document.getElementById('save-status');
+  if (!el) return;
+  if (state === 'synced') {
+    el.textContent = (count > 1 ? count + ' records' : 'Record') + ' saved to log \u2713';
+    el.className = 'save-status success';
+  } else if (state === 'offline') {
+    el.textContent = 'Saved offline \u2014 will sync when connected';
+    el.className = 'save-status offline';
+  } else {
+    el.textContent = 'Sync error \u2014 saved locally';
+    el.className = 'save-status error';
+  }
+  el.style.display = 'block';
+  setTimeout(function() { el.style.display = 'none'; }, 4000);
+}
+
+function downloadCSV() {
+  var queue = getQueue();
+  if (queue.length === 0) { alert('No records saved yet.'); return; }
+  var keys = Object.keys(queue[0]);
+  var csv = keys.join(',') + '\n';
+  queue.forEach(function(r) {
+    csv += keys.map(function(k) {
+      var v = r[k] === undefined ? '' : String(r[k]);
+      return '"' + v.replace(/"/g, '""') + '"';
+    }).join(',') + '\n';
+  });
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ECN_leads_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+function renderQueueStatus() {
+  var btn = document.getElementById('save-btn');
+  if (btn) {
+    if (isContactComplete()) {
+      btn.disabled = false;
+      btn.title = '';
+    } else {
+      btn.disabled = true;
+      btn.title = 'Complete prospect contact info on Tab 1 to save.';
+    }
+  }
+  var el = document.getElementById('queue-count');
+  if (!el) return;
+  var queue = getQueue();
+  var pending = queue.filter(function(r) { return r.sync_status === 'queued'; }).length;
+  if (pending > 0) {
+    el.textContent = pending + ' record' + (pending > 1 ? 's' : '') + ' pending sync';
+  } else if (queue.length > 0) {
+    el.textContent = queue.length + ' record' + (queue.length > 1 ? 's' : '') + ' in local log';
+  } else {
+    el.textContent = '';
+  }
+}
+
+window.addEventListener('online', function() {
+  syncQueue();
+});
+
+updateCapture();
+setTimeout(positionMarkers, 150);
+window.addEventListener('resize', positionMarkers);
+</script>
+</body>
+</html>
