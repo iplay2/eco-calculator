@@ -39,7 +39,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0C447C;color:#ff
 /* Input fields */
 .field-group{margin-bottom:1.1rem}
 .field-group:last-child{margin-bottom:0}
-.field-label{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:6px;display:block}
+.field-label{font-size:15px;font-weight:500;color:rgba(255,255,255,.85);margin-bottom:6px;display:block}
 .field-label-dark{font-size:13px;color:#042C53;font-weight:500;margin-bottom:6px;display:block}
 .big-input{width:100%;font-size:22px;font-weight:600;padding:14px 16px;border:2px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;text-align:center;outline:none;-webkit-appearance:none}
 .big-input::placeholder{color:rgba(255,255,255,.35)}
@@ -172,6 +172,11 @@ input[type=range]::-moz-range-thumb{
 .save-status.offline{color:#FFD580;background:rgba(255,213,128,.15)}
 .save-status.error{color:#F09595;background:rgba(240,149,149,.15)}
 .queue-count{font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-top:6px}
+
+/* Report KPI */
+.rpt-kpi{background:rgba(255,255,255,.08);border-radius:10px;padding:.9rem .75rem;text-align:center}
+.rpt-kpi-val{font-size:22px;font-weight:700;color:#fff}
+.rpt-kpi-lbl{font-size:11px;color:rgba(255,255,255,.5);margin-top:4px}
 .btn-save:disabled{opacity:.45;cursor:not-allowed}
 
 /* References */
@@ -197,41 +202,58 @@ input[type=range]::-moz-range-thumb{
   <div class="tab-item" onclick="goTab(2)">3 · ECN impact</div>
   <div class="tab-item" onclick="goTab(3)">4 · Display zones</div>
   <div class="tab-item" onclick="goTab(4)">5 · Summary</div>
-  <div class="tab-item" onclick="goTab(5)">References</div>
+  <div class="tab-item" onclick="goTab(5)">6 · Report</div>
+  <div class="tab-item" onclick="goTab(6)">References</div>
 </div>
 
 <!-- TAB 0 -->
 <div id="tab-0" class="tab-content active">
-  <div class="sec-label">Sales representative</div>
+  <div class="sec-label">Traffic and Volume</div>
   <div class="card">
+    <div class="grid2">
+      <div class="field-group">
+        <label class="field-label">Daily Road Traffic (DOT AADT)</label>
+        <input type="number" id="f_traffic" class="big-input" value="10000" oninput="V.traffic=+this.value||0;updateCapture()">
+        <div class="field-note">Vehicles/day past property</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fuel Price ($/Gal)</label>
+        <input type="number" id="f_fuelprice" class="big-input" value="3.31" step="0.05" oninput="V.fuelprice=+this.value||0">
+        <div class="field-note">EIA 2024 avg $3.31</div>
+      </div>
+    </div>
     <div class="field-group">
-      <label class="field-label">Sales person</label>
-      <select id="f_salesperson" class="big-input" style="font-size:16px;text-align:left">
-        <option value="">Select sales person…</option>
-        <option>Alfredo Munera</option>
-        <option>Carlos Roa</option>
-        <option>Clinton Roudenbush</option>
-        <option>David Defelici</option>
-        <option>Jean Pierre Albrecht</option>
-        <option>Marcela Giraldo</option>
-        <option>Matthew Diersen</option>
-      </select>
+      <label class="field-label">Daily Fuel Transactions</label>
+      <input type="number" id="f_fillups" class="big-input" value="320" oninput="V.fillups=+this.value||0;updateCapture()">
+      <div class="field-note">Median ~320/day · NACS avg ~480/day</div>
+      <div class="dbadge">Capture rate: <strong id="capture-derived">—</strong></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Daily In-Store Transactions</label>
+      <input type="number" id="f_basefoot" class="big-input" value="560" oninput="V.basefoot=+this.value||0;updateCapture()">
+      <div class="field-note">Median ~560/day · NACS avg ~1,100/day</div>
+      <div class="dbadge">Store/pump ratio: <strong id="ratio-derived">—</strong></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Avg In-Store Basket Size ($)</label>
+      <input type="number" id="f_basket" class="big-input" value="7.80" step="0.10" oninput="V.basket=+this.value||0">
+      <div class="field-note">NACS 2023 avg $7.80</div>
     </div>
   </div>
 
-  <div class="sec-label">Prospect contact <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4)">(required to save: company, first, last, email)</span></div>
+  <div class="sec-label">Prospect Contact <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4)">(required to save: company, first, last, email)</span></div>
   <div class="card">
     <div class="field-group">
-      <label class="field-label">Company name</label>
+      <label class="field-label">Company Name</label>
       <input type="text" id="f_storename" class="big-input" style="font-size:16px;text-align:left" placeholder="e.g. Sunshine Fuel &amp; Go" oninput="updateStoreName();validateContact()">
     </div>
     <div class="grid2">
       <div class="field-group">
-        <label class="field-label">First name</label>
+        <label class="field-label">First Name</label>
         <input type="text" id="f_fname" class="big-input" style="font-size:16px;text-align:left" placeholder="First" oninput="validateContact()">
       </div>
       <div class="field-group">
-        <label class="field-label">Last name</label>
+        <label class="field-label">Last Name</label>
         <input type="text" id="f_lname" class="big-input" style="font-size:16px;text-align:left" placeholder="Last" oninput="validateContact()">
       </div>
     </div>
@@ -244,7 +266,7 @@ input[type=range]::-moz-range-thumb{
       <input type="tel" id="f_phone" class="big-input" style="font-size:16px;text-align:left" placeholder="(555) 555-5555">
     </div>
     <div class="field-group">
-      <label class="field-label">Street address</label>
+      <label class="field-label">Street Address</label>
       <input type="text" id="f_street" class="big-input" style="font-size:16px;text-align:left" placeholder="123 Main St">
     </div>
     <div class="grid2">
@@ -258,7 +280,7 @@ input[type=range]::-moz-range-thumb{
       </div>
     </div>
     <div class="field-group">
-      <label class="field-label">Zip code</label>
+      <label class="field-label">Zip Code</label>
       <input type="text" id="f_zip" class="big-input" style="font-size:16px;text-align:left" placeholder="33157" maxlength="10">
     </div>
     <div id="contact-warning" class="contact-warn">Company name, first name, last name, and email are required to save.</div>
@@ -268,40 +290,20 @@ input[type=range]::-moz-range-thumb{
     </div>
   </div>
 
-  <div class="sec-label">Property</div>
-  <div class="card">
-    <div class="grid2">
-      <div class="field-group">
-        <label class="field-label">Daily road traffic (DOT AADT)</label>
-        <input type="number" id="f_traffic" class="big-input" value="10000" oninput="V.traffic=+this.value||0;updateCapture()">
-        <div class="field-note">Vehicles/day past property</div>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Fuel price ($/gal)</label>
-        <input type="number" id="f_fuelprice" class="big-input" value="3.31" step="0.05" oninput="V.fuelprice=+this.value||0">
-        <div class="field-note">EIA 2024 avg $3.31</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="sec-label">Ask the prospect</div>
+  <div class="sec-label">Sales Representative</div>
   <div class="card">
     <div class="field-group">
-      <label class="field-label">Daily fuel transactions</label>
-      <input type="number" id="f_fillups" class="big-input" value="320" oninput="V.fillups=+this.value||0;updateCapture()">
-      <div class="field-note">Median ~320/day · NACS avg ~480/day</div>
-      <div class="dbadge">Capture rate: <strong id="capture-derived">—</strong></div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Daily in-store transactions</label>
-      <input type="number" id="f_basefoot" class="big-input" value="560" oninput="V.basefoot=+this.value||0;updateCapture()">
-      <div class="field-note">Median ~560/day · NACS avg ~1,100/day</div>
-      <div class="dbadge">Store/pump ratio: <strong id="ratio-derived">—</strong></div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Avg in-store basket size ($)</label>
-      <input type="number" id="f_basket" class="big-input" value="7.80" step="0.10" oninput="V.basket=+this.value||0">
-      <div class="field-note">NACS 2023 avg $7.80</div>
+      <label class="field-label">Sales Person</label>
+      <select id="f_salesperson" class="big-input" style="font-size:16px;text-align:left">
+        <option value="">Select sales person…</option>
+        <option>Alfredo Munera</option>
+        <option>Carlos Roa</option>
+        <option>Clinton Roudenbush</option>
+        <option>David Defelici</option>
+        <option>Jean Pierre Albrecht</option>
+        <option>Marcela Giraldo</option>
+        <option>Matthew Diersen</option>
+      </select>
     </div>
   </div>
 
@@ -427,7 +429,7 @@ input[type=range]::-moz-range-thumb{
         <span class="slider-val" id="v_lift">4.1%</span>
       </div>
       <div class="slider-track" id="wrap_lift">
-        <input type="range" id="s_lift" min="3" max="40" step="0.5" value="4.1" oninput="sync('lift',this.value)">
+        <input type="range" id="s_lift" min="1" max="40" step="0.5" value="4.1" oninput="sync('lift',this.value)">
         <div class="avg-tick-wrap" id="avg_lift"><div class="avg-tick"></div><div class="avg-lbl">avg 8.1%</div></div>
       </div>
     </div>
@@ -544,13 +546,60 @@ input[type=range]::-moz-range-thumb{
     <div id="queue-count" class="queue-count"></div>
   </div>
 
-  <div class="nav-row" style="justify-content:flex-start">
-    <button class="btn-secondary" style="max-width:150px" onclick="goTab(3)">← Back</button>
+  <div class="nav-row">
+    <button class="btn-secondary" onclick="goTab(3)">← Back</button>
+    <button class="btn-primary" onclick="goTab(5)">View Report →</button>
   </div>
 </div>
 
-<!-- TAB 5 -->
+<!-- TAB 5: Report -->
 <div id="tab-5" class="tab-content">
+  <div style="text-align:center;margin-bottom:1.25rem">
+    <div style="font-size:18px;font-weight:700;color:#fff" id="rpt-store-name">Revenue Opportunity Report</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px" id="rpt-date"></div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:4px">What ECN digital signage can add to your bottom line</div>
+    <div style="font-size:42px;font-weight:800;color:#9FE1CB" id="rpt-hero">—</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.6);margin-top:4px" id="rpt-hero-sub">additional revenue per year</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">ECN Revenue Lift by Category</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:1rem">Estimated new daily revenue added by ECN signage.</div>
+    <canvas id="rpt-bar-chart" width="600" height="280" style="width:100%;height:auto"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Where the New Revenue Comes From</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:1rem">Each step builds toward your total incremental revenue.</div>
+    <canvas id="rpt-waterfall" width="600" height="320" style="width:100%;height:auto"></canvas>
+    <div id="rpt-wf-legend" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">What This Means for Your Business</div>
+    <div id="rpt-explainer" style="font-size:14px;color:rgba(255,255,255,.8);line-height:1.7"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Key Numbers at a Glance</div>
+    <div id="rpt-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-top:0">Long-Term Customer Value</div>
+    <div id="rpt-clv-text" style="font-size:14px;color:rgba(255,255,255,.8);line-height:1.7"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-secondary" onclick="goTab(4)">← Back</button>
+  </div>
+</div>
+
+<!-- TAB 6 -->
+<div id="tab-6" class="tab-content">
   <div class="card">
     <div class="sec-label" style="margin-top:0">Industry benchmarks</div>
     <div class="ref-item"><div class="ref-src">NACS State of the Industry 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">1,491 combined daily transactions/store. Basket $7.80. In-store $327.6B, fuel $532.2B. Source: convenience.org</div></div>
@@ -606,7 +655,7 @@ var avgMarkers = {
   monument:{val:2.5,min:0.5,max:8},
   gallons:{val:10.5,min:6,max:16},
   window:{val:7,min:1,max:20},
-  lift:{val:8.1,min:3,max:40},
+  lift:{val:8.1,min:1,max:40},
   clv:{val:450,min:50,max:2000}
 };
 
@@ -694,6 +743,7 @@ function goTab(n) {
     el.classList.toggle('active', i === n);
   });
   if (n === 4) { renderSummary(); renderQueueStatus(); }
+  if (n === 5) { renderReport(); }
   setTimeout(positionMarkers, 80);
 }
 
@@ -1074,6 +1124,210 @@ function renderQueueStatus() {
     el.textContent = queue.length + ' record' + (queue.length > 1 ? 's' : '') + ' in local log';
   } else {
     el.textContent = '';
+  }
+}
+
+function renderReport() {
+  var m = model();
+  var storeName = document.getElementById('f_storename').value.trim();
+  set('rpt-store-name', storeName ? storeName + ' — Revenue Opportunity' : 'Revenue Opportunity Report');
+  set('rpt-date', 'Prepared ' + new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}));
+  set('rpt-hero', fmt(m.ecnTotal * 365));
+  set('rpt-hero-sub', 'additional revenue per year');
+
+  // Bar chart — Before vs After
+  var canvas = document.getElementById('rpt-bar-chart');
+  if (canvas) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = 280 * dpr;
+    ctx.scale(dpr, dpr);
+    var w = canvas.offsetWidth, h = 280;
+    ctx.clearRect(0, 0, w, h);
+
+    var bars = [];
+    if (activeZones.monument && m.ecnFuelRev > 0) bars.push({label:'New Fuel\nSales', val:m.ecnFuelRev, color:'#85B7EB'});
+    if ((activeZones.monument || activeZones.window) && m.ecnInstoreNew > 0) bars.push({label:'New Store\nVisits', val:m.ecnInstoreNew, color:'#9FE1CB'});
+    if (activeZones.instore && m.basketLift > 0) bars.push({label:'Basket Size\nLift', val:m.basketLift, color:'#FAC775'});
+    if (bars.length === 0) bars.push({label:'No zones\nactive', val:0, color:'rgba(255,255,255,.15)'});
+
+    var maxVal = Math.max.apply(null, bars.map(function(b) { return b.val; })) * 1.2;
+    if (maxVal === 0) maxVal = 1;
+    var barW = Math.min(60, (w - 60) / (bars.length * 1.8));
+    var gap = (w - 40) / bars.length;
+
+    for (var i = 0; i < bars.length; i++) {
+      var bx = 20 + gap * i + gap / 2;
+      var bh = (bars[i].val / maxVal) * (h - 70);
+
+      ctx.fillStyle = bars[i].color;
+      ctx.beginPath();
+      ctx.roundRect(bx - barW / 2, h - 40 - bh, barW, bh, 6);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(bars[i].val > 0 ? fmt(bars[i].val) + '/day' : '', bx, h - 46 - bh);
+
+      ctx.fillStyle = 'rgba(255,255,255,.6)';
+      ctx.font = '11px system-ui';
+      var lines = bars[i].label.split('\n');
+      for (var li = 0; li < lines.length; li++) {
+        ctx.fillText(lines[li], bx, h - 22 + li * 13);
+      }
+    }
+  }
+
+  // Waterfall chart — revenue buildup
+  var wfCanvas = document.getElementById('rpt-waterfall');
+  var wfLegend = document.getElementById('rpt-wf-legend');
+  if (wfCanvas) {
+    var wCtx = wfCanvas.getContext('2d');
+    var wDpr = window.devicePixelRatio || 1;
+    var wW = wfCanvas.offsetWidth;
+    var wH = 320;
+    wfCanvas.width = wW * wDpr;
+    wfCanvas.height = wH * wDpr;
+    wCtx.scale(wDpr, wDpr);
+    wCtx.clearRect(0, 0, wW, wH);
+
+    var steps = [];
+    if (activeZones.monument && m.ecnFuelRev > 0) steps.push({label:'New Fuel\nSales', val:m.ecnFuelRev, color:'#85B7EB'});
+    if ((activeZones.monument || activeZones.window) && m.ecnInstoreNew > 0) steps.push({label:'New Store\nVisits', val:m.ecnInstoreNew, color:'#9FE1CB'});
+    if (activeZones.instore && m.basketLift > 0) steps.push({label:'Basket\nLift', val:m.basketLift, color:'#FAC775'});
+    steps.push({label:'Total\nLift', val:m.ecnTotal, running:m.ecnTotal, color:'#9FE1CB', isTotal:true});
+
+    var running = 0;
+    for (var si = 0; si < steps.length - 1; si++) {
+      steps[si].running = running;
+      running += steps[si].val;
+    }
+
+    var maxVal = m.ecnTotal * 1.18;
+    var n = steps.length;
+    var padL = 10, padR = 10, topPad = 30, botPad = 50;
+    var chartW = wW - padL - padR;
+    var chartH = wH - topPad - botPad;
+    var barGap = Math.max(8, chartW * 0.06);
+    var barW = (chartW - barGap * (n - 1)) / n;
+    barW = Math.min(barW, 70);
+    var totalBarsW = barW * n + barGap * (n - 1);
+    var startX = padL + (chartW - totalBarsW) / 2;
+
+    for (var j = 0; j < n; j++) {
+      var s = steps[j];
+      var x = startX + j * (barW + barGap);
+      var barH, barY;
+
+      if (s.isBase || s.isTotal) {
+        barH = maxVal > 0 ? (s.val / maxVal) * chartH : 0;
+        barY = topPad + chartH - barH;
+      } else {
+        var baseH = maxVal > 0 ? (s.running / maxVal) * chartH : 0;
+        barH = maxVal > 0 ? (s.val / maxVal) * chartH : 0;
+        barY = topPad + chartH - baseH - barH;
+      }
+
+      wCtx.fillStyle = s.color;
+      wCtx.beginPath();
+      wCtx.roundRect(x, barY, barW, barH, 4);
+      wCtx.fill();
+
+      // Connector line from previous bar
+      if (j > 0 && j < n - 1) {
+        wCtx.strokeStyle = 'rgba(255,255,255,.15)';
+        wCtx.lineWidth = 1;
+        wCtx.setLineDash([3, 3]);
+        wCtx.beginPath();
+        wCtx.moveTo(x - barGap, barY + barH);
+        wCtx.lineTo(x, barY + barH);
+        wCtx.stroke();
+        wCtx.setLineDash([]);
+      }
+
+      // Value label above bar
+      wCtx.fillStyle = '#fff';
+      wCtx.font = 'bold 11px system-ui';
+      wCtx.textAlign = 'center';
+      if (s.isBase || s.isTotal) {
+        wCtx.fillText(fmt(s.val), x + barW / 2, barY - 6);
+      } else {
+        wCtx.fillStyle = s.color;
+        wCtx.fillText('+' + fmt(s.val), x + barW / 2, barY - 6);
+      }
+
+      // Label below bar
+      wCtx.fillStyle = 'rgba(255,255,255,.6)';
+      wCtx.font = '10px system-ui';
+      var lines = s.label.split('\n');
+      for (var li = 0; li < lines.length; li++) {
+        wCtx.fillText(lines[li], x + barW / 2, topPad + chartH + 16 + li * 13);
+      }
+    }
+
+    // Legend
+    if (wfLegend) {
+      var legItems = [
+        {color:'rgba(255,255,255,.3)', label:'Current Revenue'},
+        {color:'#85B7EB', label:'Monument Sign'},
+        {color:'#9FE1CB', label:'Window Displays'},
+        {color:'#FAC775', label:'In-Store Screens'}
+      ];
+      wfLegend.innerHTML = '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;font-size:11px">' +
+        legItems.map(function(l) {
+          return '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + l.color + ';vertical-align:middle;margin-right:4px"></span><span style="color:rgba(255,255,255,.55)">' + l.label + '</span></span>';
+        }).join('') + '</div>';
+    }
+  } else if (wfLegend) {
+    wfLegend.innerHTML = '<div style="text-align:center;font-size:13px;color:rgba(255,255,255,.4)">Enable display zones to see breakdown.</div>';
+  }
+
+  // Explainer text
+  var exp = document.getElementById('rpt-explainer');
+  if (exp) {
+    var lines = [];
+    if (activeZones.monument && m.ecnPumps > 0) {
+      lines.push('Your ECN monument sign is projected to attract <strong>' + Math.round(m.ecnPumps) + ' additional vehicles per day</strong> off the road and to your pumps. That translates to <strong>' + fmt(m.ecnFuelRev) + ' in new daily fuel sales</strong>.');
+    }
+    if ((activeZones.window || activeZones.monument) && m.ecnInstoreNew > 0) {
+      lines.push('ECN window displays and signage will convert more pump customers into store shoppers, generating an estimated <strong>' + fmt(m.ecnInstoreNew) + ' per day</strong> in new in-store purchases.');
+    }
+    if (activeZones.instore && m.basketLift > 0) {
+      lines.push('In-store digital screens encourage impulse buys and featured product purchases, lifting your average basket by <strong>' + V.lift.toFixed(1) + '%</strong> — that\'s <strong>' + fmt(m.basketLift) + ' more per day</strong> from your existing customers.');
+    }
+    if (m.ecnTotal > 0) {
+      lines.push('Combined, ECN signage adds an estimated <strong>' + fmt(m.ecnTotal) + ' per day</strong> to your revenue — that\'s <strong>' + fmt(m.ecnTotal * 30) + ' per month</strong> or <strong>' + fmt(m.ecnTotal * 365) + ' per year</strong> in new revenue on top of what you\'re already doing.');
+    }
+    exp.innerHTML = lines.length > 0 ? lines.map(function(l) { return '<p style="margin-bottom:.75rem">' + l + '</p>'; }).join('') : '<p style="color:rgba(255,255,255,.4)">Enable display zones and adjust sliders to see projected impact.</p>';
+  }
+
+  // KPI grid
+  var kpi = document.getElementById('rpt-kpi-grid');
+  if (kpi) {
+    var kpis = [
+      {val: fmt(m.ecnTotal), lbl: 'Daily Revenue Lift'},
+      {val: fmt(m.ecnTotal * 30), lbl: 'Monthly Revenue Lift'},
+      {val: fmt(m.ecnTotal * 365), lbl: 'Annual Revenue Lift'},
+      {val: fmtN(Math.round(m.ecnPumps)) + '/day', lbl: 'New Pump Visitors'},
+      {val: fmtN(Math.round(m.ecnInstore + (activeZones.window ? V.fillups * V.window / 100 : 0))) + '/day', lbl: 'New Store Visitors'},
+      {val: fmtN(Math.round(m.newLoyalPerMonth)) + '/mo', lbl: 'New Loyal Customers'}
+    ];
+    kpi.innerHTML = kpis.map(function(k) {
+      return '<div class="rpt-kpi"><div class="rpt-kpi-val">' + k.val + '</div><div class="rpt-kpi-lbl">' + k.lbl + '</div></div>';
+    }).join('');
+  }
+
+  // CLV text
+  var clv = document.getElementById('rpt-clv-text');
+  if (clv) {
+    if (m.ecnPumps > 0) {
+      clv.innerHTML = '<p style="margin-bottom:.75rem">Beyond daily revenue, ECN signage builds long-term customer loyalty. Of the <strong>' + Math.round(m.ecnPumps) + ' new daily visitors</strong>, an estimated <strong>5%</strong> will become loyal repeat customers — that\'s <strong>' + Math.round(m.newLoyalPerMonth) + ' new loyal customers every month</strong>.</p>' +
+        '<p>At an estimated lifetime value of <strong>' + fmt(V.clv) + ' per customer</strong>, that adds <strong>' + fmt(m.clvMonthly) + ' in long-term value every month</strong> to your business.</p>';
+    } else {
+      clv.innerHTML = '<p style="color:rgba(255,255,255,.4)">Enable the monument sign zone to see customer lifetime value projections.</p>';
+    }
   }
 }
 
