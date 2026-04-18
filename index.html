@@ -876,7 +876,8 @@ function model() {
   var windowExisting = activeZones.window ? V.fillups * windowBoost : 0;
   var basketLift = activeZones.instore ? V.basefoot * V.basket * (V.lift / 100) : 0;
   var ecnFuelRev = ecnPumps * V.gallons * V.fuelprice;
-  var ecnInstoreNew = ecnInstore * V.basket + windowExisting * V.basket;
+  var liftedBasket = V.basket * (1 + (activeZones.instore ? V.lift / 100 : 0));
+  var ecnInstoreNew = ecnInstore * liftedBasket + windowExisting * liftedBasket;
   var ecnTotal = ecnFuelRev + ecnInstoreNew + basketLift;
   var loyal = ecnPumps * 30 * 0.05;
   return {
