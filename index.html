@@ -550,6 +550,7 @@ input[type=range]::-moz-range-thumb{
     <button id="save-btn" class="btn-primary btn-save" style="width:100%;margin-bottom:10px" onclick="saveRecord()">Save prospect record</button>
     <button class="btn-secondary" style="width:100%;margin-bottom:10px" onclick="downloadCSV()">Download CSV log</button>
     <div id="save-status" class="save-status" style="display:none"></div>
+    <div id="report-link" class="save-status" style="display:none"></div>
     <div id="queue-count" class="queue-count"></div>
   </div>
 
@@ -1118,14 +1119,17 @@ function syncQueue() {
   pending.forEach(function(record) {
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'text/plain'},
       body: JSON.stringify(record)
-    }).then(function() {
+    }).then(function(resp) { return resp.json(); })
+    .then(function(json) {
       record.sync_status = 'synced';
       synced++;
       updateQueue(record);
       if (synced === pending.length) showSaveStatus('synced', synced);
+      if (json.results && json.results.report && json.results.report.url) {
+        showReportLink(json.results.report.url);
+      }
       renderQueueStatus();
     }).catch(function() {
       showSaveStatus('error');
@@ -1157,6 +1161,14 @@ function showSaveStatus(state, count) {
   }
   el.style.display = 'block';
   setTimeout(function() { el.style.display = 'none'; }, 4000);
+}
+
+function showReportLink(url) {
+  var el = document.getElementById('report-link');
+  if (!el) return;
+  el.innerHTML = '<a href="' + url + '" target="_blank" style="color:#9FE1CB;text-decoration:underline">View Report ↗</a>';
+  el.className = 'save-status success';
+  el.style.display = 'block';
 }
 
 function downloadCSV() {
