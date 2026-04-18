@@ -13,7 +13,9 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#0C447C;color:#fff;min-height:100vh;padding:0}
 
 /* Header */
-.app-header{background:#042C53;padding:1rem 1.25rem .75rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.app-header{background:#042C53;padding:1rem 1.25rem .75rem;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:flex-start;justify-content:space-between}
+.btn-reset{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;margin-top:2px}
+.btn-reset:active{background:rgba(255,255,255,.25)}
 .app-title{font-size:20px;font-weight:600;color:#fff;line-height:1.2}
 .app-sub{font-size:13px;color:rgba(255,255,255,.6);margin-top:3px}
 .store-name-sub{font-size:13px;color:#85B7EB;margin-top:2px;min-height:18px}
@@ -192,9 +194,12 @@ input[type=range]::-moz-range-thumb{
 <body>
 
 <div class="app-header">
-  <div class="app-title">ECN Convenience Store Revenue Potential</div>
-  <div class="app-sub">EyeCatch Networks — field sales tool</div>
-  <div class="store-name-sub" id="store-name-display"></div>
+  <div>
+    <div class="app-title">ECN Convenience Store Revenue Potential</div>
+    <div class="app-sub">EyeCatch Networks — field sales tool</div>
+    <div class="store-name-sub" id="store-name-display"></div>
+  </div>
+  <button class="btn-reset" onclick="resetSession()">New Session</button>
 </div>
 
 <div class="tab-bar">
@@ -708,6 +713,36 @@ function validateContact() {
 function adtCaptureRate(adt, slider) {
   var base = 30 / Math.sqrt(Math.max(adt, 5000));
   return base * (slider / 2.5);
+}
+
+function resetSession() {
+  if (!confirm('Start a new session? All unsaved data will be cleared.')) return;
+  V.traffic=10000; V.fuelprice=3.31; V.fillups=320; V.basefoot=560;
+  V.basket=7.80; V.monument=1.3; V.window=3.5; V.lift=4.1; V.clv=225; V.gallons=8.3;
+  document.getElementById('f_traffic').value=10000;
+  document.getElementById('f_fuelprice').value=3.31;
+  document.getElementById('f_fillups').value=320;
+  document.getElementById('f_basefoot').value=560;
+  document.getElementById('f_basket').value=7.80;
+  ['f_storename','f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'].forEach(function(id) {
+    document.getElementById(id).value='';
+  });
+  document.getElementById('f_notes').value='';
+  document.getElementById('f_salesperson').selectedIndex=0;
+  ['monument','gallons','window','lift','clv'].forEach(function(k) { sync(k, {monument:1.3,gallons:8.3,window:3.5,lift:4.1,clv:225}[k]); });
+  activeZones = {monument:true, window:true, instore:true};
+  document.querySelectorAll('.zone-btn').forEach(function(el) { el.classList.add('active'); });
+  clientCorner=null; homeDir='none'; compStep=1;
+  corners={NW:null,NE:null,SW:null,SE:null};
+  ['NW','NE','SW','SE'].forEach(function(c) {
+    var b=document.getElementById('btn-'+c);
+    b.className='corner-btn';
+    b.innerHTML='<div style="font-size:20px;opacity:.5">+</div><div style="font-size:11px;color:rgba(255,255,255,.5)">'+c+'</div>';
+  });
+  updateStoreName();
+  updateCapture();
+  validateContact();
+  goTab(0);
 }
 
 function adtMedianCapture(adt) {
