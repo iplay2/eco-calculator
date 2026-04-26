@@ -654,7 +654,7 @@ input[type=range]::-moz-range-thumb{
   <div class="card">
     <div class="sec-label" style="margin-top:0">State DOT Traffic Data</div>
     <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:1rem">Tap a state to open its DOT traffic count portal and look up AADT for a specific location.</p>
-    <div id="dot-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem"></div>
+    <div id="dot-grid"></div>
     <p style="font-size:11px;color:rgba(255,255,255,.35);margin-top:1rem">Additional states will be added as resources are identified.</p>
   </div>
 </div>
@@ -679,16 +679,23 @@ var DOT_LINKS = [
   var grid = document.getElementById('dot-grid');
   if (!grid) return;
   DOT_LINKS.sort(function(a, b) { return a.state.localeCompare(b.state); });
-  DOT_LINKS.forEach(function(d) {
-    var a = document.createElement('a');
-    a.href = d.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.cssText = 'display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;text-decoration:none;color:#fff;font-size:14px;font-weight:500;transition:background .15s';
-    a.innerHTML = '<span style="font-size:11px;font-weight:700;background:rgba(133,183,235,.25);color:#85B7EB;padding:.2rem .45rem;border-radius:5px;min-width:28px;text-align:center">' + d.code + '</span>' + d.state + '<span style="margin-left:auto;font-size:16px;color:rgba(255,255,255,.35)">↗</span>';
-    a.addEventListener('touchstart', function() { this.style.background = 'rgba(255,255,255,.12)'; });
-    a.addEventListener('touchend', function() { this.style.background = 'rgba(255,255,255,.06)'; });
-    grid.appendChild(a);
+  var half = Math.ceil(DOT_LINKS.length / 2);
+  grid.style.cssText = 'display:flex;gap:.6rem';
+  [DOT_LINKS.slice(0, half), DOT_LINKS.slice(half)].forEach(function(col) {
+    var colDiv = document.createElement('div');
+    colDiv.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:.6rem';
+    col.forEach(function(d) {
+      var a = document.createElement('a');
+      a.href = d.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.cssText = 'display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;text-decoration:none;color:#fff;font-size:14px;font-weight:500;transition:background .15s';
+      a.innerHTML = '<span style="font-size:11px;font-weight:700;background:rgba(133,183,235,.25);color:#85B7EB;padding:.2rem .45rem;border-radius:5px;min-width:28px;text-align:center">' + d.code + '</span>' + d.state + '<span style="margin-left:auto;font-size:16px;color:rgba(255,255,255,.35)">↗</span>';
+      a.addEventListener('touchstart', function() { this.style.background = 'rgba(255,255,255,.12)'; });
+      a.addEventListener('touchend', function() { this.style.background = 'rgba(255,255,255,.06)'; });
+      colDiv.appendChild(a);
+    });
+    grid.appendChild(colDiv);
   });
 })();
 
