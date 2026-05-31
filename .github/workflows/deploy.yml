@@ -1,0 +1,21 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy index.html to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 3.236.177.73 >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/deploy_key index.html iplay2@3.236.177.73:/var/www/apps/ecn-calculator/index.html
