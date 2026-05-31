@@ -1069,7 +1069,7 @@ function renderSummary() {
   set('s_clv_total', fmt(m.clvMonthly) + '/mo');
 }
 
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSdRnikGwwIb-ocJBYBGrgtSoKchRxGzReUYNd5Hp9SAQnVASENi0Dx9NToc71b3ei/exec';
+var APPS_SCRIPT_URL = 'https://iplay2.tv/C-Store-Revenue-Calculator/api/submit';
 var STORAGE_KEY = 'ecn_submission_queue';
 
 function val(id) {
@@ -1170,7 +1170,7 @@ function syncQueue() {
   pending.forEach(function(record) {
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'text/plain'},
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(record)
     }).then(function(resp) { return resp.json(); })
     .then(function(json) {
