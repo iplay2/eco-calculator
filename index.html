@@ -1191,8 +1191,11 @@ function syncQueue() {
       synced++;
       updateQueue(record);
       if (synced === pending.length) showSaveStatus('synced', synced);
-      if (json.results && json.results.report && json.results.report.url) {
-        showReportLink(json.results.report.url);
+      if (json.results) {
+        var pdfUrl  = json.results.pdf  && json.results.pdf.url;
+        var docxUrl = json.results.docx && json.results.docx.url;
+        var rptUrl  = json.results.report && json.results.report.url;
+        showReportLinks(pdfUrl, docxUrl, rptUrl);
       }
       renderQueueStatus();
     }).catch(function() {
@@ -1227,10 +1230,14 @@ function showSaveStatus(state, count) {
   setTimeout(function() { el.style.display = 'none'; }, 4000);
 }
 
-function showReportLink(url) {
+function showReportLinks(pdfUrl, docxUrl, rptUrl) {
   var el = document.getElementById('report-link');
   if (!el) return;
-  el.innerHTML = '<a href="' + url + '" target="_blank" style="color:#9FE1CB;text-decoration:underline">View Report ↗</a>';
+  var links = [];
+  if (pdfUrl)  links.push('<a href="' + pdfUrl  + '" target="_blank" style="color:#9FE1CB;text-decoration:underline;margin-right:16px">&#x1F4C4; Download PDF</a>');
+  if (docxUrl) links.push('<a href="' + docxUrl + '" target="_blank" style="color:#9FE1CB;text-decoration:underline;margin-right:16px">&#x1F4DD; Download Word</a>');
+  if (rptUrl)  links.push('<a href="' + rptUrl  + '" target="_blank" style="color:#9FE1CB;text-decoration:underline">View Online &#x2197;</a>');
+  el.innerHTML = links.join('');
   el.className = 'save-status success';
   el.style.display = 'block';
 }
