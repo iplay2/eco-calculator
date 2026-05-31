@@ -18,4 +18,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H 3.236.177.73 >> ~/.ssh/known_hosts
-          scp -i ~/.ssh/deploy_key index.html iplay2@3.236.177.73:/var/www/apps/ecn-calculator/index.html
+          scp -i ~/.ssh/deploy_key index.html iplay2@3.236.177.73:/var/www/apps/C-Store-Revenue-Calculator/index.html
