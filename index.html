@@ -246,7 +246,19 @@ input[type=range]::-moz-range-thumb{
     <div class="field-group">
       <label class="field-label">Avg In-Store Basket Size ($)</label>
       <input type="number" id="f_basket" class="big-input" value="7.80" step="0.10" oninput="V.basket=+this.value||0">
-      <div class="field-note">NACS 2023 avg $7.80</div>
+      <div class="field-note" id="basket-note">NACS 2023 avg $7.80</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Prepared Food Program?</label>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:500">
+          <input type="checkbox" id="f_food_program" style="width:18px;height:18px;accent-color:#ea9700;cursor:pointer" onchange="toggleFoodProgram(this.checked)">
+          Active prepared food / foodservice program
+        </label>
+      </div>
+      <div id="food-program-note" style="display:none;margin-top:6px;padding:8px 10px;background:rgba(234,151,0,.12);border-left:3px solid #ea9700;border-radius:4px;font-size:12px;color:rgba(255,255,255,.75);line-height:1.5">
+        📊 Stores with active food programs average <strong style="color:#FAC775">~35% higher baskets</strong> than packaged-goods-only stores — basket adjusted to $10.50. (CSN State of Industry 2024: foodservice now 20.4% of C-store in-store sales, with prepared food the top category at +12.9% YoY.)
+      </div>
     </div>
   </div>
 
@@ -613,6 +625,7 @@ input[type=range]::-moz-range-thumb{
   <div class="card">
     <div class="sec-label" style="margin-top:0">Industry benchmarks</div>
     <div class="ref-item"><div class="ref-src">NACS State of the Industry 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">1,491 combined daily transactions/store. Basket $7.80. In-store $327.6B, fuel $532.2B. Source: convenience.org</div></div>
+    <div class="ref-item"><div class="ref-src">CSN State of the Industry 2024 — Foodservice <span class="ref-bdg">solid</span></div><div class="ref-det">Foodservice reached 20.4% of C-store in-store sales in 2023 — an all-time high. Avg foodservice sales/store: $388,607 (+11.9%). Prepared food the top segment at $293,286/store (+12.9%). Stores with active food programs generate materially higher average basket sizes due to food+beverage bundling effect. Baseline for prepared food program basket adjustment: ~35% above packaged-goods-only stores (~$10.50 vs $7.80). Source: csnews.com</div></div>
     <div class="ref-item"><div class="ref-src">NACS / NIQ 2024 State of Convenience <span class="ref-bdg">solid</span></div><div class="ref-det">165M daily C-store visits. Total 2024 sales $837.4B. Avg gas price $3.31/gal. Source: nielseniq.com</div></div>
     <div class="ref-item"><div class="ref-src">Convenience Store News 2024–2025 <span class="ref-bdg">solid</span></div><div class="ref-det">In-store 38.8% of revenue, 60.7% of gross profit. Fuel 61.2% of revenue, 39.3% of gross profit. Source: csnews.com</div></div>
     <div class="ref-item"><div class="ref-src">MMCG Invest — Gas Station P&L Database 2023 <span class="ref-bdg">solid</span></div><div class="ref-det">Median store: fuel rev ~$4.77M/yr, C-store ~$1.08M/yr, combined ~$5.86M/yr. ~320 fuel/day, ~560 in-store/day. Source: mmcginvest.com</div></div>
@@ -718,6 +731,31 @@ var V = {
   traffic:10000, fuelprice:3.31, fillups:320, basefoot:560,
   basket:7.80, monument:1.3, window:3.5, lift:4.1, clv:225, gallons:8.3
 };
+var hasFoodProgram = false;
+
+function toggleFoodProgram(checked) {
+  hasFoodProgram = checked;
+  var note = document.getElementById('food-program-note');
+  var basketNote = document.getElementById('basket-note');
+  var basketInput = document.getElementById('f_basket');
+  if (checked) {
+    note.style.display = 'block';
+    // Only auto-adjust if still at the default value
+    if (Math.abs(V.basket - 7.80) < 0.01) {
+      basketInput.value = '10.50';
+      V.basket = 10.50;
+    }
+    basketNote.textContent = 'Food program avg ~$10.50 (CSN 2024: foodservice = 20.4% of in-store sales)';
+  } else {
+    note.style.display = 'none';
+    if (Math.abs(V.basket - 10.50) < 0.01) {
+      basketInput.value = '7.80';
+      V.basket = 7.80;
+    }
+    basketNote.textContent = 'NACS 2023 avg $7.80';
+  }
+  recalc();
+}
 var activeZones = {monument:true, window:true, instore:true};
 var period = 'daily';
 var periodMult = {daily:1, monthly:30, annual:365};
@@ -789,6 +827,10 @@ function resetSession() {
   document.getElementById('f_fillups').value=320;
   document.getElementById('f_basefoot').value=560;
   document.getElementById('f_basket').value=7.80;
+  document.getElementById('f_food_program').checked=false;
+  document.getElementById('food-program-note').style.display='none';
+  document.getElementById('basket-note').textContent='NACS 2023 avg $7.80';
+  hasFoodProgram=false;
   ['f_storename','f_fname','f_lname','f_email','f_phone','f_street','f_city','f_state','f_zip'].forEach(function(id) {
     document.getElementById(id).value='';
   });
@@ -1118,6 +1160,7 @@ function buildRecord() {
     daily_fuel_transactions: V.fillups,
     daily_instore_transactions: V.basefoot,
     basket_size: V.basket,
+    has_food_program: hasFoodProgram,
     baseline_capture_rate_pct: V.traffic > 0 ? (V.fillups/V.traffic*100).toFixed(2) : 0,
     client_corner: clientCorner || 'not set',
     homeward_direction: homeDir,
